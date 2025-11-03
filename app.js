@@ -53,7 +53,9 @@ const emptyState = document.getElementById('emptyState');
 const filterButtons = document.querySelectorAll('.filter-btn');
 const toast = document.getElementById('toast');
 const dishImagePreview = document.getElementById('dishImagePreview');
-const aiSuggestionsBtn = document.getElementById('aiSuggestionsBtn');
+let aiSuggestionsBtn = null;
+let viewMenuCardBtn = null;
+let allDishes = [];
 
 // Event Listeners
 joinEventBtn.addEventListener('click', handleJoinEvent);
@@ -61,9 +63,6 @@ copyCodeBtn.addEventListener('click', copyEventCode);
 addDishForm.addEventListener('submit', handleAddDish);
 eventThemeInput.addEventListener('change', handleThemePreview);
 dishNameInput.addEventListener('input', handleDishNameInput);
-if (aiSuggestionsBtn) {
-    aiSuggestionsBtn.addEventListener('click', showAISuggestions);
-}
 filterButtons.forEach(btn => {
     btn.addEventListener('click', () => handleFilterChange(btn.dataset.category));
 });
@@ -200,6 +199,18 @@ function showEventInterface() {
     eventThemeInput.disabled = true;
     userNameInput.disabled = true;
     joinEventBtn.disabled = true;
+    
+    // Attach AI suggestions button listener
+    aiSuggestionsBtn = document.getElementById('aiSuggestionsBtn');
+    if (aiSuggestionsBtn) {
+        aiSuggestionsBtn.addEventListener('click', showAISuggestions);
+    }
+    
+    // Attach menu card button listener
+    viewMenuCardBtn = document.getElementById('viewMenuCardBtn');
+    if (viewMenuCardBtn) {
+        viewMenuCardBtn.addEventListener('click', showMenuCard);
+    }
 }
 
 // Copy Event Code
@@ -339,6 +350,8 @@ function listenToDishes() {
 
 // Render Dishes
 function renderDishes(dishes) {
+    allDishes = dishes; // Store globally for menu card
+    
     if (dishes.length === 0) {
         dishesList.innerHTML = '';
         emptyState.classList.remove('hidden');
@@ -359,6 +372,99 @@ function renderDishes(dishes) {
     
     // Apply current filter
     applyFilter();
+}
+
+// Show Complete Menu Card
+function showMenuCard() {
+    if (allDishes.length === 0) {
+        showToast('No dishes to display yet!', 'error');
+        return;
+    }
+    
+    // Group dishes by category
+    const grouped = {
+        appetizer: [],
+        main: [],
+        side: [],
+        dessert: [],
+        beverage: [],
+        other: []
+    };
+    
+    allDishes.forEach(dish => {
+        if (grouped[dish.category]) {
+            grouped[dish.category].push(dish);
+        }
+    });
+    
+    const categoryNames = {
+        appetizer: '🥗 Appetizers',
+        main: '🍽️ Main Courses',
+        side: '🥘 Side Dishes',
+        dessert: '🍰 Desserts',
+        beverage: '🥤 Beverages',
+        other: '🍴 Other'
+    };
+    
+    let menuHTML = '<div style="max-height: 70vh; overflow-y: auto;">';
+    
+    Object.keys(grouped).forEach(category => {
+        if (grouped[category].length > 0) {
+            menuHTML += `
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--primary);">
+                        ${categoryNames[category]}
+                    </h3>
+                    <div style="display: grid; gap: 0.75rem;">
+                        ${grouped[category].map(dish => `
+                            <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 1.125rem; color: var(--gray-900);">${escapeHtml(dish.name)}</div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.25rem;">
+                                        👤 ${escapeHtml(dish.contributor)}
+                                        ${dish.notes ? ` • 📝 ${escapeHtml(dish.notes)}` : ''}
+                                    </div>
+                                </div>
+                                ${dish.imageUrl ? `
+                                    <img src="${dish.imageUrl}" alt="${escapeHtml(dish.name)}" 
+                                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; margin-left: 1rem;"
+                                         onerror="this.style.display='none'">
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    menuHTML += '</div>';
+    
+    const modalHTML = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(5px);" onclick="this.remove()">
+            <div style="background: white; border-radius: 1.5rem; padding: 2.5rem; max-width: 900px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2 style="font-size: 2rem; font-weight: 800; color: var(--gray-900); margin: 0;">📋 Complete Menu Card</h2>
+                        <p style="color: var(--gray-600); margin-top: 0.5rem;">${themeNames[currentTheme] || currentTheme} • ${allDishes.length} dishes</p>
+                    </div>
+                    <button onclick="this.closest('div[style*=fixed]').remove()" 
+                            style="background: var(--gray-100); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; color: var(--gray-600); transition: all 0.2s;"
+                            onmouseover="this.style.background='var(--gray-200)'"
+                            onmouseout="this.style.background='var(--gray-100)'">&times;</button>
+                </div>
+                ${menuHTML}
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px dashed var(--gray-200); text-align: center;">
+                    <button onclick="window.print()" 
+                            style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 0.75rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                        🖨️ Print Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
 // Create Dish Card HTML
