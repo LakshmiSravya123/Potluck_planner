@@ -43,33 +43,54 @@
   </div>
 
   <script>
-    // Initialize Firebase for create page
-    const firebaseConfig = {
-      apiKey: "AIzaSyCzvH64kpIcpgUrjxVsJBhF9SxME7pVCyQ",
-      authDomain: "potluck-planner-15a68.firebaseapp.com",
-      databaseURL: "https://potluck-planner-15a68-default-rtdb.firebaseio.com",
-      projectId: "potluck-planner-15a68",
-      storageBucket: "potluck-planner-15a68.firebasestorage.app",
-      messagingSenderId: "209595251975",
-      appId: "1:209595251975:web:961acb493b364e9fedd9a2",
-      measurementId: "G-VQKX9HP4SM"
-    };
+    // Wait for Firebase to load
+    let db;
     
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    window.addEventListener('load', function() {
+      // Initialize Firebase for create page
+      const firebaseConfig = {
+        apiKey: "AIzaSyCzvH64kpIcpgUrjxVsJBhF9SxME7pVCyQ",
+        authDomain: "potluck-planner-15a68.firebaseapp.com",
+        databaseURL: "https://potluck-planner-15a68-default-rtdb.firebaseio.com",
+        projectId: "potluck-planner-15a68",
+        storageBucket: "potluck-planner-15a68.firebasestorage.app",
+        messagingSenderId: "209595251975",
+        appId: "1:209595251975:web:961acb493b364e9fedd9a2",
+        measurementId: "G-VQKX9HP4SM"
+      };
+      
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        console.log('✅ Firebase initialized successfully');
+      } else {
+        console.error('❌ Firebase SDK not loaded');
+      }
+    });
     
     function createPotluckEvent() {
+      if (!db) {
+        alert('Firebase is still loading, please wait a moment and try again.');
+        return;
+      }
+      
       const name = document.getElementById('new-event-name').value || 'Potluck';
       const theme = document.getElementById('new-theme').value;
       const id = Date.now().toString(36).toUpperCase();
       const url = `${location.origin}/Potluck_planner/index.html?code=${id}`;
+      
       db.ref(`events/${id.toLowerCase()}`).set({ 
         createdAt: Date.now(),
         createdBy: 'Anonymous',
         theme: theme,
         name: name
+      }).then(() => {
+        document.getElementById('share-link').innerHTML = `Share: <a href="${url}" target="_blank">${url}</a><br><button onclick="navigator.clipboard.writeText('${url}'); alert('Copied!')">Copy Link</button>`;
+        console.log('✅ Event created:', id);
+      }).catch(err => {
+        console.error('❌ Error creating event:', err);
+        alert('Error creating event: ' + err.message);
       });
-      document.getElementById('share-link').innerHTML = `Share: <a href="${url}" target="_blank">${url}</a><br><button onclick="navigator.clipboard.writeText('${url}'); alert('Copied!')">Copy Link</button>`;
     }
   </script>
 </body>
