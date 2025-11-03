@@ -193,7 +193,7 @@
       const name = document.getElementById('new-event-name').value.trim();
       const eventDate = document.getElementById('event-date').value;
       const eventTime = document.getElementById('event-time').value;
-      const location = document.getElementById('event-location').value.trim();
+      const eventLocation = document.getElementById('event-location').value.trim();
       const hostName = document.getElementById('host-name').value.trim();
       const hostEmail = document.getElementById('host-email').value.trim();
       const theme = document.getElementById('new-theme').value;
@@ -217,7 +217,7 @@
       }
       
       const id = Date.now().toString(36).toUpperCase();
-      const url = `${location.origin}/Potluck_planner/index.html?code=${id}`;
+      const url = `${window.location.origin}/Potluck_planner/index.html?code=${id}`;
       
       // Create comprehensive event object
       const eventData = {
@@ -226,7 +226,7 @@
         theme: theme,
         date: eventDate,
         time: eventTime || null,
-        location: location || null,
+        location: eventLocation || null,
         host: {
           name: hostName,
           email: hostEmail || null
