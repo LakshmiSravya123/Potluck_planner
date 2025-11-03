@@ -1135,6 +1135,13 @@ body.theme-birthday .decorations::after {
     }
 }
 
+/* Form Grid Responsive */
+@media (max-width: 640px) {
+    .card [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
