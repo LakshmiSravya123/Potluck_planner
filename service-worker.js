@@ -1,7 +1,11 @@
-const CACHE = 'potluck-v1';
+const CACHE = 'potluck-v2';
 const FILES = [
-  '/', '/Potluck_planner/', '/Potluck_planner/index.html', '/Potluck_planner/style.css', '/Potluck_planner/app.js',
-  '/Potluck_planner/create.html', '/Potluck_planner/manifest.json', '/Potluck_planner/icon-192.png', '/Potluck_planner/icon-512.png'
+  '/Potluck_planner/',
+  '/Potluck_planner/index.html',
+  '/Potluck_planner/style.css',
+  '/Potluck_planner/app.js',
+  '/Potluck_planner/create.html',
+  '/Potluck_planner/manifest.json'
 ];
 
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES))));

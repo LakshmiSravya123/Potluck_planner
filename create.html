@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Create Potluck</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
 </head>
 <body>
@@ -35,13 +35,13 @@
       <option value="autumn">🍂 Autumn</option>
       <option value="spring">🌸 Spring</option>
     </select>
-    <button onclick="createEvent()">Create & Get Link</button>
+    <button onclick="createPotluckEvent()">Create & Get Link</button>
     <p id="share-link"></p>
     <p><a href="index.html">Back to App</a></p>
   </div>
 
   <script>
-    function createEvent() {
+    function createPotluckEvent() {
       const name = document.getElementById('new-event-name').value || 'Potluck';
       const theme = document.getElementById('new-theme').value;
       const id = Date.now().toString(36);
