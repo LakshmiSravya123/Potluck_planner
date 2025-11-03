@@ -70,6 +70,21 @@ let allDishes = [];
     }
 })();
 
+// Check URL for event code parameter (from QR code or shared link)
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = urlParams.get('code');
+    
+    if (codeFromUrl) {
+        // Auto-fill event code from URL
+        eventCodeInput.value = codeFromUrl.toUpperCase();
+        // Scroll to join section
+        document.getElementById('joinSection')?.scrollIntoView({ behavior: 'smooth' });
+        // Show a hint
+        showToast('Event code loaded! Enter your name to join.', 'success');
+    }
+});
+
 // Event Listeners
 joinEventBtn.addEventListener('click', handleJoinEvent);
 copyCodeBtn.addEventListener('click', copyEventCode);
