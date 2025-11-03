@@ -325,19 +325,6 @@ td:hover {
 .theme-autumn { background: url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1920&q=80') center/cover fixed no-repeat !important; }
 .theme-spring { background: url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&q=80') center/cover fixed no-repeat !important; }
 
-/* Better text readability on all themes */
-.container { 
-  background: rgba(255,255,255,0.95); 
-  color: #333;
-}
-
-/* Dark themes need light text */
-.theme-halloween .container, 
-.theme-pride .container { 
-  background: rgba(0,0,0,0.85); 
-  color: white; 
-}
-
 /* Text shadows for better readability */
 h1, h2, h3 {
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
