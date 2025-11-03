@@ -8,12 +8,12 @@ h1 { color: #333; }
 
 /* BIRTHDAY */
 .theme-birthday { background: linear-gradient(#fff3e0, #ffe0b2); }
-.theme-birthday h1, .theme-birthday button { color: #ff6d00; }
+.theme-birthday h1 { color: #ff6d00; }
 .theme-birthday button { background: #ff9100; }
 
 /* CHRISTMAS */
 .theme-christmas { background: linear-gradient(#e8f5e9, #c8e6c9); }
-.theme-christmas h1, .theme-christmas button { color: #d32f2f; }
+.theme-christmas h1 { color: #d32f2f; }
 .theme-christmas button { background: #c62828; }
 
 /* HALLOWEEN */
@@ -23,52 +23,52 @@ h1 { color: #333; }
 
 /* VALENTINES */
 .theme-valentines { background: linear-gradient(#fce4ec, #f8bbd0); }
-.theme-valentines h1, .theme-valentines button { color: #e91e63; }
+.theme-valentines h1 { color: #e91e63; }
 .theme-valentines button { background: #c2185b; }
 
 /* DIWALI */
 .theme-diwali { background: linear-gradient(#fff8e1, #ffecb3); }
-.theme-diwali h1, .theme-diwali button { color: #ff6f00; }
+.theme-diwali h1 { color: #ff6f00; }
 .theme-diwali button { background: #f57c00; }
 
 /* THANKSGIVING */
 .theme-thanksgiving { background: linear-gradient(#fff3e0, #ffe0b2); }
-.theme-thanksgiving h1, .theme-thanksgiving button { color: #ff8f00; }
+.theme-thanksgiving h1 { color: #ff8f00; }
 .theme-thanksgiving button { background: #ef6c00; }
 
 /* NEW YEAR */
 .theme-newyear { background: linear-gradient(#e0f7fa, #b2ebf2); }
-.theme-newyear h1, .theme-newyear button { color: #0277bd; }
+.theme-newyear h1 { color: #0277bd; }
 .theme-newyear button { background: #01579b; }
 
 /* EASTER */
 .theme-easter { background: linear-gradient(#f3e5f5, #e1bee7); }
-.theme-easter h1, .theme-easter button { color: #7b1fa2; }
+.theme-easter h1 { color: #7b1fa2; }
 .theme-easter button { background: #4a148c; }
 
 /* SUMMER BBQ */
 .theme-bbq { background: linear-gradient(#fffde7, #fff59d); }
-.theme-bbq h1, .theme-bbq button { color: #f57c00; }
+.theme-bbq h1 { color: #f57c00; }
 .theme-bbq button { background: #ef6c00; }
 
 /* BEACH PARTY */
 .theme-beach { background: linear-gradient(#e0f2f1, #b2dfdb); }
-.theme-beach h1, .theme-beach button { color: #00695c; }
+.theme-beach h1 { color: #00695c; }
 .theme-beach button { background: #004d40; }
 
 /* WEDDING */
 .theme-wedding { background: linear-gradient(#fafafa, #eceff1); }
-.theme-wedding h1, .theme-wedding button { color: #424242; }
+.theme-wedding h1 { color: #424242; }
 .theme-wedding button { background: #212121; }
 
 /* BABY SHOWER */
 .theme-babyshower { background: linear-gradient(#e8f5e9, #c8e6c9); }
-.theme-babyshower h1, .theme-babyshower button { color: #2e7d32; }
+.theme-babyshower h1 { color: #2e7d32; }
 .theme-babyshower button { background: #1b5e20; }
 
 /* GRADUATION */
 .theme-graduation { background: linear-gradient(#e3f2fd, #bbdefb); }
-.theme-graduation h1, .theme-graduation button { color: #1565c0; }
+.theme-graduation h1 { color: #1565c0; }
 .theme-graduation button { background: #0d47a1; }
 
 /* HALLOWEEN */
@@ -78,12 +78,12 @@ h1 { color: #333; }
 
 /* SUPERBOWL */
 .theme-superbowl { background: linear-gradient(#ffebee, #ffcdd2); }
-.theme-superbowl h1, .theme-superbowl button { color: #d32f2f; }
+.theme-superbowl h1 { color: #d32f2f; }
 .theme-superbowl button { background: #b71c1c; }
 
 /* CINCO DE MAYO */
 .theme-cinco { background: linear-gradient(#e8f5e9, #c8e6c9); }
-.theme-cinco h1, .theme-cinco button { color: #2e7d32; }
+.theme-cinco h1 { color: #2e7d32; }
 .theme-cinco button { background: #1b5e20; }
 
 /* PRIDE */
@@ -93,22 +93,22 @@ h1 { color: #333; }
 
 /* RAMADAN */
 .theme-ramadan { background: linear-gradient(#e0f2f1, #b2dfdb); }
-.theme-ramadan h1, .theme-ramadan button { color: #004d40; }
+.theme-ramadan h1 { color: #004d40; }
 .theme-ramadan button { background: #00695c; }
 
 /* HANUKKAH */
 .theme-hanukkah { background: linear-gradient(#e3f2fd, #bbdefb); }
-.theme-hanukkah h1, .theme-hanukkah button { color: #0d47a1; }
+.theme-hanukkah h1 { color: #0d47a1; }
 .theme-hanukkah button { background: #1565c0; }
 
 /* AUTUMN */
 .theme-autumn { background: linear-gradient(#fff3e0, #ffe0b2); }
-.theme-autumn h1, .theme-autumn button { color: #e65100; }
+.theme-autumn h1 { color: #e65100; }
 .theme-autumn button { background: #ef6c00; }
 
 /* SPRING */
 .theme-spring { background: linear-gradient(#f3e5f5, #e1bee7); }
-.theme-spring h1, .theme-spring button { color: #6a1b9a; }
+.theme-spring h1 { color: #6a1b9a; }
 .theme-spring button { background: #4a148c; }
 
 @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
@@ -118,8 +118,32 @@ h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
 .form, .ai-section { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
 input, select, button { padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; font-family: 'Poppins', sans-serif; }
 input, select { flex: 1; min-width: 150px; }
-button { background: #4CAF50; color: white; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+button { background: #4CAF50; color: white !important; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s; }
 button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+/* Override theme button colors to ensure visibility */
+.theme-birthday button,
+.theme-christmas button,
+.theme-halloween button,
+.theme-valentines button,
+.theme-diwali button,
+.theme-thanksgiving button,
+.theme-newyear button,
+.theme-easter button,
+.theme-bbq button,
+.theme-beach button,
+.theme-wedding button,
+.theme-babyshower button,
+.theme-graduation button,
+.theme-superbowl button,
+.theme-cinco button,
+.theme-pride button,
+.theme-ramadan button,
+.theme-hanukkah button,
+.theme-autumn button,
+.theme-spring button {
+  color: white !important;
+}
 
 /* Item List */
 .item { background: #f0f8ff; padding: 15px; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s; }
