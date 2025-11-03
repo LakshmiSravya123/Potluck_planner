@@ -58,9 +58,9 @@
     function createPotluckEvent() {
       const name = document.getElementById('new-event-name').value || 'Potluck';
       const theme = document.getElementById('new-theme').value;
-      const id = Date.now().toString(36);
+      const id = Date.now().toString(36).toUpperCase();
       const url = `${location.origin}/Potluck_planner/index.html?code=${id}`;
-      db.ref(`events/${id}`).set({ 
+      db.ref(`events/${id.toLowerCase()}`).set({ 
         createdAt: Date.now(),
         createdBy: 'Anonymous',
         theme: theme,
