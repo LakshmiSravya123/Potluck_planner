@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Potluck Event - Potluck Planner</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .creator-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .creator-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .creator-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .creator-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .creator-subtitle {
+            color: var(--gray-600);
+            font-size: 1.125rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .create-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 0.875rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+            margin-top: 1rem;
+        }
+        
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        .create-btn:active {
+            transform: translateY(0);
+        }
+        
+        .output-section {
+            margin-top: 2.5rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+            border-radius: 1rem;
+            border: 2px dashed var(--primary-light);
+            text-align: center;
+            display: none;
+        }
+        
+        .output-section.active {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .event-link {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: var(--primary);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .qr-container {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 1rem;
+            display: inline-block;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-copy {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-print {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+        }
+        
+        .btn-join {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-join:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .back-link:hover {
+            transform: translateX(-4px);
+        }
+    </style>
+</head>
+<body>
+    <div class="decorations" id="decorations"></div>
+    
+    <div class="creator-container">
+        <a href="index.html" class="back-link">← Back to Planner</a>
+        
+        <div class="creator-card">
+            <div class="creator-header">
+                <h1 class="creator-title">🎉 Create Your Event</h1>
+                <p class="creator-subtitle">Set up a new potluck in seconds!</p>
+            </div>
+            
+            <form id="createForm">
+                <div class="form-group">
+                    <label class="form-label" for="eventCode">Event Code</label>
+                    <input 
+                        type="text" 
+                        id="eventCode" 
+                        class="form-input" 
+                        placeholder="e.g., thanksgiving-2025, bbq-party"
+                        pattern="[a-z0-9-]+"
+                        title="Use lowercase letters, numbers, and hyphens only"
+                        required
+                    >
+                    <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+                        Use lowercase letters, numbers, and hyphens (e.g., summer-bbq-2025)
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="eventTitle">Event Title</label>
+                    <input 
+                        type="text" 
+                        id="eventTitle" 
+                        class="form-input" 
+                        placeholder="e.g., Thanksgiving Potluck 2025"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="eventTheme">Theme</label>
+                    <select id="eventTheme" class="form-input" required>
+                        <option value="default">Default</option>
+                        <option value="birthday">🎂 Birthday</option>
+                        <option value="christmas">🎄 Christmas</option>
+                        <option value="thanksgiving">🦃 Thanksgiving</option>
+                        <option value="halloween">🎃 Halloween</option>
+                        <option value="newyear">🎊 New Year</option>
+                        <option value="summer">☀️ Summer</option>
+                        <option value="spring">🌸 Spring</option>
+                        <option value="wedding">💒 Wedding</option>
+                        <option value="graduation">🎓 Graduation</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="create-btn">
+                    ✨ Create Event & Generate QR Code
+                </button>
+            </form>
+            
+            <div id="outputSection" class="output-section">
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900); margin-bottom: 1rem;">
+                    🎉 Event Created Successfully!
+                </h2>
+                
+                <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                    Share this link or QR code with your guests:
+                </p>
+                
+                <div id="eventLink" class="event-link"></div>
+                
+                <div class="qr-container">
+                    <div id="qrcode"></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn btn-copy" onclick="copyLink()">
+                        📋 Copy Link
+                    </button>
+                    <button class="action-btn btn-print" onclick="window.print()">
+                        🖨️ Print QR Code
+                    </button>
+                    <button class="action-btn btn-join" onclick="joinEvent()">
+                        🚀 Join Event Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    
+    <script>
+        // Firebase Configuration (same as app.js)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzvH64kpIcpgUrjxVsJBhF9SxME7pVCyQ",
+            authDomain: "potluck-planner-15a68.firebaseapp.com",
+            databaseURL: "https://potluck-planner-15a68-default-rtdb.firebaseio.com",
+            projectId: "potluck-planner-15a68",
+            storageBucket: "potluck-planner-15a68.firebasestorage.app",
+            messagingSenderId: "209595251975",
+            appId: "1:209595251975:web:961acb493b364e9fedd9a2",
+            measurementId: "G-VQKX9HP4SM"
+        };
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let generatedEventUrl = '';
+        
+        // Handle form submission
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const eventCode = document.getElementById('eventCode').value.toLowerCase().trim();
+            const eventTitle = document.getElementById('eventTitle').value.trim();
+            const eventTheme = document.getElementById('eventTheme').value;
+            
+            // Validate event code format
+            if (!/^[a-z0-9-]+$/.test(eventCode)) {
+                showToast('Event code must contain only lowercase letters, numbers, and hyphens', 'error');
+                return;
+            }
+            
+            // Check if event already exists
+            database.ref(`events/${eventCode}`).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        if (!confirm('An event with this code already exists. Overwrite it?')) {
+                            return;
+                        }
+                    }
+                    
+                    // Create event in Firebase
+                    return database.ref(`events/${eventCode}`).set({
+                        title: eventTitle,
+                        theme: eventTheme,
+                        created: firebase.database.ServerValue.TIMESTAMP,
+                        createdBy: 'organizer'
+                    });
+                })
+                .then(() => {
+                    // Generate event URL
+                    const baseUrl = window.location.origin + window.location.pathname.replace('create.html', 'index.html');
+                    generatedEventUrl = `${baseUrl}?code=${eventCode}`;
+                    
+                    // Display results
+                    document.getElementById('eventLink').textContent = generatedEventUrl;
+                    document.getElementById('outputSection').classList.add('active');
+                    
+                    // Generate QR code
+                    document.getElementById('qrcode').innerHTML = '';
+                    new QRCode(document.getElementById('qrcode'), {
+                        text: generatedEventUrl,
+                        width: 256,
+                        height: 256,
+                        colorDark: '#6366f1',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    
+                    showToast('Event created successfully! 🎉', 'success');
+                    
+                    // Scroll to output
+                    document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error('Error creating event:', error);
+                    showToast('Failed to create event. Please try again.', 'error');
+                });
+        });
+        
+        // Copy link to clipboard
+        function copyLink() {
+            navigator.clipboard.writeText(generatedEventUrl)
+                .then(() => {
+                    showToast('Link copied to clipboard! 📋', 'success');
+                })
+                .catch(() => {
+                    showToast('Failed to copy link', 'error');
+                });
+        }
+        
+        // Join the created event
+        function joinEvent() {
+            window.location.href = generatedEventUrl;
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Auto-generate event code suggestion
+        document.getElementById('eventTitle').addEventListener('input', function(e) {
+            const title = e.target.value.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .substring(0, 30);
+            
+            if (title && !document.getElementById('eventCode').value) {
+                document.getElementById('eventCode').value = title;
+            }
+        });
+    </script>
+</body>
+</html>

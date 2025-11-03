@@ -305,6 +305,21 @@ function handleAddDish(e) {
         return;
     }
     
+    // Check for duplicate dishes
+    const duplicate = allDishes.find(dish => 
+        dish.name.toLowerCase() === dishName.toLowerCase()
+    );
+    
+    if (duplicate) {
+        const confirmAdd = confirm(
+            `⚠️ "${duplicate.name}" is already on the menu (brought by ${duplicate.contributor}).\n\nDo you still want to add "${dishName}"?`
+        );
+        if (!confirmAdd) {
+            showToast('Dish not added - duplicate avoided! ✅', 'success');
+            return;
+        }
+    }
+    
     const dishesRef = database.ref(`events/${currentEventCode}/dishes`);
     const newDishRef = dishesRef.push();
     

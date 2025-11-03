@@ -7,13 +7,34 @@ A beautiful, real-time web app to coordinate potluck events. Share a code, add d
 
 ## ✨ Features
 
-- 🎯 **Create or Join Events** - Generate a unique event code or join with an existing one
-- 🍕 **Add Dishes** - Contribute your dish with category and notes
-- 👥 **Real-time Updates** - See dishes added by others instantly
+### 🤖 AI-Powered
+- ✨ **AI Image Search** - Type a dish name, AI finds beautiful food images automatically
+- 🎯 **Smart Suggestions** - Get theme-based dish recommendations (Birthday, Christmas, etc.)
+- 🖼️ **Visual Menu** - Dishes display with gorgeous AI-generated images
+
+### 🎉 Event Management
+- 📝 **Event Creation Page** - Dedicated page to create events with QR codes
+- 🎨 **10 Beautiful Themes** - Birthday, Christmas, Thanksgiving, Halloween, Summer, and more
+- 📊 **Live Stats** - Real-time dish count and contributor tracking
+- 🎭 **Animated Decorations** - Theme-specific animations (balloons, snowflakes, etc.)
+
+### 🍽️ Dish Coordination
+- ✏️ **Edit Dishes** - Fix typos or update your contributions
+- ⚠️ **Duplicate Detection** - Warns you if someone already brought that dish
 - 🏷️ **Category Filtering** - Filter by appetizers, mains, sides, desserts, beverages
-- 📱 **Responsive Design** - Works perfectly on mobile, tablet, and desktop
-- 🔒 **Delete Your Dishes** - Only you can remove dishes you added
-- 🎨 **Modern UI** - Beautiful gradient design with smooth animations
+- 📋 **Complete Menu Card** - Beautiful printable menu organized by category
+
+### 📱 Sharing & Collaboration
+- 📱 **QR Code Generation** - Instant QR codes for easy event sharing
+- ✉️ **Email Reminders** - Send invites via EmailJS (free tier: 200/month)
+- 👥 **Real-time Sync** - See updates instantly across all devices
+- 📲 **PWA Support** - Install as an app on your phone!
+
+### 🎨 Design & UX
+- 🌈 **Animated Gradient Background** - Smooth, modern color-shifting design
+- 💎 **Glassmorphism UI** - Frosted glass cards with backdrop blur
+- 📱 **Fully Responsive** - Perfect on mobile, tablet, and desktop
+- ⚡ **Lightning Fast** - Optimized performance and smooth animations
 - 💯 **100% Free** - No sign-up, no cost, just share and plan!
 
 ## 🚀 Quick Start
@@ -158,10 +179,13 @@ const firebaseConfig = {
 
 ```
 potluckplanner/
-├── index.html              # Main HTML file
-├── styles.css              # All styling
-├── app.js                  # JavaScript logic + Firebase
+├── index.html              # Main app - join/manage events
+├── create.html             # Event creation page with QR codes
+├── styles.css              # All styling with animations
+├── app.js                  # JavaScript logic + Firebase + AI
+├── manifest.json           # PWA manifest for installable app
 ├── firebase-config-template.js  # Config template
+├── DEMO_VIDEO_SCRIPTS.md   # Video marketing scripts
 ├── README.md               # This file
 └── .gitignore             # Git ignore rules
 ```
@@ -259,18 +283,33 @@ Contributions are welcome! Feel free to:
 - Suggest features
 - Submit pull requests
 
+## 💡 Completed Features
+
+- [x] ✨ AI-powered image search
+- [x] 🎯 Smart dish suggestions
+- [x] ✏️ Edit dishes
+- [x] ⚠️ Duplicate detection
+- [x] 📱 QR code generation
+- [x] ✉️ Email reminders (EmailJS)
+- [x] 📋 Print-friendly menu view
+- [x] 📊 Live statistics
+- [x] 🎨 Multiple themes
+- [x] 📲 PWA support (installable)
+- [x] 📝 Event creation page
+
 ## 💡 Future Ideas
 
 - [ ] Event details (date, time, location)
-- [ ] Dietary restriction tags
+- [ ] Dietary restriction tags (vegan, gluten-free, etc.)
 - [ ] Serving size tracking
 - [ ] Recipe links
-- [ ] Photo uploads
-- [ ] Email/SMS notifications
-- [ ] Print-friendly menu view
+- [ ] Photo uploads for custom dish images
+- [ ] SMS notifications
 - [ ] Export to PDF
-- [ ] Multiple events per user
-- [ ] Event templates
+- [ ] Multiple events per user dashboard
+- [ ] Event templates (save favorites)
+- [ ] Ingredient list aggregation
+- [ ] Shopping list generator
 
 ## 🙏 Acknowledgments
 
