@@ -182,35 +182,25 @@
                 <p class="share-text">Share this code with others to let them join!</p>
                 
                 <!-- Share Options -->
-                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
-                    <button id="generateQRBtn" class="btn" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="5" height="5"></rect>
-                            <rect x="16" y="3" width="5" height="5"></rect>
-                            <rect x="3" y="16" width="5" height="5"></rect>
-                            <path d="M21 16h-3a2 2 0 0 0-2 2v3"></path>
-                        </svg>
-                        📱 Generate QR Code
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="generateQRBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white;" title="Generate QR Code">
+                        📱
                     </button>
-                    <button id="sendReminderBtn" class="btn" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                            <polyline points="22,6 12,13 2,6"></polyline>
-                        </svg>
-                        ✉️ Send Email Reminder
+                    <button id="sendReminderBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;" title="Send Email Reminder">
+                        📧
                     </button>
                 </div>
                 
                 <!-- Viral Share & Export Buttons -->
-                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
-                    <button id="shareWhatsAppBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #25D366, #128C7E); color: white;">
-                        📱 Share on WhatsApp
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <button id="shareWhatsAppBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #25D366, #128C7E); color: white;" title="Share on WhatsApp">
+                        💬
                     </button>
-                    <button id="shareTwitterBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #1DA1F2, #0d8bd9); color: white;">
-                        🐦 Share on X
+                    <button id="shareTwitterBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1DA1F2, #0d8bd9); color: white;" title="Share on X">
+                        🐦
                     </button>
-                    <button id="exportMenuBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white;">
-                        📄 Export Menu
+                    <button id="exportMenuBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white;" title="Export Menu">
+                        📄
                     </button>
                 </div>
             </div>
@@ -229,22 +219,11 @@
                 <h2 class="section-title">Add Your Dish</h2>
             </div>
             
-            <!-- AI Suggestions Button -->
-            <button id="aiSuggestBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; margin-bottom: 0.5rem;" title="Get AI Dish Suggestions">
-                ✨
-            </button>
-            
             <form id="addDishForm" class="dish-form">
                 <div class="form-row">
                     <div class="input-group">
-                        <label for="dishName">Dish Name ✨ AI-powered</label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required style="flex: 1;">
-                            <button type="button" id="voiceInputBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center;" title="Voice input">
-                                🎤
-                            </button>
-                        </div>
-                        <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">Type or speak a dish name to see AI-generated image preview</small>
+                        <label for="dishName">Dish Name</label>
+                        <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required>
                     </div>
                     <div class="input-group">
                         <label for="dishCategory">Category</label>
@@ -259,9 +238,6 @@
                         </select>
                     </div>
                 </div>
-                
-                <!-- AI Image Preview -->
-                <div id="dishImagePreview" style="display: none; margin: 1rem 0; padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; border: 2px dashed var(--primary-light);"></div>
                 
                 <div class="input-group">
                     <label for="dishNotes">Notes (optional)</label>
