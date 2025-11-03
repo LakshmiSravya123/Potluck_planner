@@ -57,7 +57,6 @@ for (const [key, words] of Object.entries(themeKeywords)) {
 
 document.body.classList.add(`theme-${detectedTheme}`);
 document.getElementById('theme-decor').innerHTML = getThemeHeader(detectedTheme);
-initParticles(detectedTheme);
 
 //// Load event from Firebase
 potluckRef.child('meta').once('value', snap => {
@@ -75,7 +74,6 @@ function applyTheme(theme) {
   document.body.className = ''; // Reset
   document.body.classList.add(`theme-${theme}`);
   document.getElementById('theme-decor').innerHTML = getThemeHeader(theme);
-  initParticles(theme);
 }
 
 // Add Item with Slot Check
@@ -339,18 +337,6 @@ function getThemeHeader(theme) {
   return `<div style="font-size:2rem; margin:20px 0;">${headers[theme] || headers.neutral}</div>`;
 }
 
-function initParticles(theme) {
-  if (!document.getElementById('particles-js')) return;
-  const particleConfigs = {
-    birthday: { "particles": { "number": { "value": 80 }, "color": { "value": "#ff6d00" }, "shape": { "type": "circle" }, "opacity": { "value": 0.8 } } },
-    christmas: { "particles": { "number": { "value": 100 }, "color": { "value": "#ffffff" }, "shape": { "type": "star" }, "opacity": { "value": 0.6 }, "size": { "value": 3 } } },
-    halloween: { "particles": { "number": { "value": 70 }, "color": { "value": "#ff9800" }, "shape": { "type": "triangle" } } },
-    valentines: { "particles": { "number": { "value": 60 }, "color": { "value": "#e91e63" }, "shape": { "type": "heart" } } },
-    diwali: { "particles": { "number": { "value": 90 }, "color": { "value": "#ff6f00" }, "shape": { "type": "star" } } },
-    pride: { "particles": { "number": { "value": 100 }, "color": { "value": ["#e40303","#ff8c00","#ffed00","#008026","#004dff","#750787"] } } }
-  };
-  particlesJS('particles-js', particleConfigs[theme] || { "particles": { "number": { "value": 30 }, "color": { "value": "#888" } } });
-}
 
 // PWA Service Worker
 if ('serviceWorker' in navigator) {

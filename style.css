@@ -1,115 +1,65 @@
-body { font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; transition: all 0.5s; }
-.container { max-width: 700px; margin: auto; background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; z-index: 2; }
-#particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  transition: background 1s ease;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 2;
+}
+
+/* Mobile backdrop-filter fix */
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+  .container { 
+    background: rgba(255,255,255,0.95);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+}
+
 #theme-decor { text-align: center; font-size: 3rem; margin-bottom: 20px; animation: float 4s infinite; }
 
 /* Neutral */
 h1 { color: #333; }
 
-/* BIRTHDAY */
-.theme-birthday { background: linear-gradient(#fff3e0, #ffe0b2); }
-.theme-birthday h1 { color: #ff6d00; }
-.theme-birthday button { background: #ff9100; }
+/* THEME BACKGROUNDS - REAL IMAGES! */
+.theme-birthday { background-image: url('https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Balloons */
+.theme-christmas { background-image: url('https://images.unsplash.com/photo-1543589077-47c01b3f6483?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Tree + lights */
+.theme-halloween { background-image: url('https://images.unsplash.com/photo-1608513037773-9b40b056a7b4?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Pumpkins */
+.theme-valentines { background-image: url('https://images.unsplash.com/photo-1516585420163-5c8d7e5e6a3f?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Hearts */
+.theme-diwali { background-image: url('https://images.unsplash.com/photo-1570449848762-4e5a7e3d0586?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Lamps */
+.theme-thanksgiving { background-image: url('https://images.unsplash.com/photo-1571167398043-9e8db5d4b8e9?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Feast */
+.theme-newyear { background-image: url('https://images.unsplash.com/photo-1541534741688-6078c6bfb5d5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Fireworks */
+.theme-easter { background-image: url('https://images.unsplash.com/photo-1582582484031-0d5a4e1e0a0e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Eggs */
+.theme-bbq { background-image: url('https://images.unsplash.com/photo-1529193591184-b1b7b2c8e2e8?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Grill */
+.theme-beach { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Waves */
+.theme-wedding { background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Rings */
+.theme-babyshower { background-image: url('https://images.unsplash.com/photo-1609951651556-5334e2706168?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Baby */
+.theme-graduation { background-image: url('https://images.unsplash.com/photo-1523050858586-54b946a4e7e5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Cap */
+.theme-superbowl { background-image: url('https://images.unsplash.com/photo-1518614369274-2c00e6e0b5e5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Football */
+.theme-cinco { background-image: url('https://images.unsplash.com/photo-1558452918-35c7b7e60455?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Tacos */
+.theme-pride { background-image: url('https://images.unsplash.com/photo-1599305445678-4a525b5e5b5e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Rainbow */
+.theme-ramadan { background-image: url('https://images.unsplash.com/photo-1580486877305-0e5e3e1e8c0d?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Mosque */
+.theme-hanukkah { background-image: url('https://images.unsplash.com/photo-1541605357697-6f4e2e3e5e5e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Menorah */
+.theme-autumn { background-image: url('https://images.unsplash.com/photo-1507487369694-724a9c7e9c3e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Leaves */
+.theme-spring { background-image: url('https://images.unsplash.com/photo-1495231916356-a86217e8817e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); } /* Flowers */
 
-/* CHRISTMAS */
-.theme-christmas { background: linear-gradient(#e8f5e9, #c8e6c9); }
-.theme-christmas h1 { color: #d32f2f; }
-.theme-christmas button { background: #c62828; }
-
-/* HALLOWEEN */
-.theme-halloween { background: linear-gradient(#212121, #424242); color: #ff9800; }
-.theme-halloween .container { background: #424242; }
-.theme-halloween button { background: #ff5722; }
-
-/* VALENTINES */
-.theme-valentines { background: linear-gradient(#fce4ec, #f8bbd0); }
-.theme-valentines h1 { color: #e91e63; }
-.theme-valentines button { background: #c2185b; }
-
-/* DIWALI */
-.theme-diwali { background: linear-gradient(#fff8e1, #ffecb3); }
-.theme-diwali h1 { color: #ff6f00; }
-.theme-diwali button { background: #f57c00; }
-
-/* THANKSGIVING */
-.theme-thanksgiving { background: linear-gradient(#fff3e0, #ffe0b2); }
-.theme-thanksgiving h1 { color: #ff8f00; }
-.theme-thanksgiving button { background: #ef6c00; }
-
-/* NEW YEAR */
-.theme-newyear { background: linear-gradient(#e0f7fa, #b2ebf2); }
-.theme-newyear h1 { color: #0277bd; }
-.theme-newyear button { background: #01579b; }
-
-/* EASTER */
-.theme-easter { background: linear-gradient(#f3e5f5, #e1bee7); }
-.theme-easter h1 { color: #7b1fa2; }
-.theme-easter button { background: #4a148c; }
-
-/* SUMMER BBQ */
-.theme-bbq { background: linear-gradient(#fffde7, #fff59d); }
-.theme-bbq h1 { color: #f57c00; }
-.theme-bbq button { background: #ef6c00; }
-
-/* BEACH PARTY */
-.theme-beach { background: linear-gradient(#e0f2f1, #b2dfdb); }
-.theme-beach h1 { color: #00695c; }
-.theme-beach button { background: #004d40; }
-
-/* WEDDING */
-.theme-wedding { background: linear-gradient(#fafafa, #eceff1); }
-.theme-wedding h1 { color: #424242; }
-.theme-wedding button { background: #212121; }
-
-/* BABY SHOWER */
-.theme-babyshower { background: linear-gradient(#e8f5e9, #c8e6c9); }
-.theme-babyshower h1 { color: #2e7d32; }
-.theme-babyshower button { background: #1b5e20; }
-
-/* GRADUATION */
-.theme-graduation { background: linear-gradient(#e3f2fd, #bbdefb); }
-.theme-graduation h1 { color: #1565c0; }
-.theme-graduation button { background: #0d47a1; }
-
-/* HALLOWEEN */
-.theme-halloween { background: linear-gradient(#212121, #424242); color: #ff9800; }
-.theme-halloween .container { background: #424242; }
-.theme-halloween button { background: #ff5722; }
-
-/* SUPERBOWL */
-.theme-superbowl { background: linear-gradient(#ffebee, #ffcdd2); }
-.theme-superbowl h1 { color: #d32f2f; }
-.theme-superbowl button { background: #b71c1c; }
-
-/* CINCO DE MAYO */
-.theme-cinco { background: linear-gradient(#e8f5e9, #c8e6c9); }
-.theme-cinco h1 { color: #2e7d32; }
-.theme-cinco button { background: #1b5e20; }
-
-/* PRIDE */
-.theme-pride { background: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #004dff, #750787); color: white; }
-.theme-pride .container { background: rgba(0,0,0,0.2); }
-.theme-pride button { background: #fff; color: #333; }
-
-/* RAMADAN */
-.theme-ramadan { background: linear-gradient(#e0f2f1, #b2dfdb); }
-.theme-ramadan h1 { color: #004d40; }
-.theme-ramadan button { background: #00695c; }
-
-/* HANUKKAH */
-.theme-hanukkah { background: linear-gradient(#e3f2fd, #bbdefb); }
-.theme-hanukkah h1 { color: #0d47a1; }
-.theme-hanukkah button { background: #1565c0; }
-
-/* AUTUMN */
-.theme-autumn { background: linear-gradient(#fff3e0, #ffe0b2); }
-.theme-autumn h1 { color: #e65100; }
-.theme-autumn button { background: #ef6c00; }
-
-/* SPRING */
-.theme-spring { background: linear-gradient(#f3e5f5, #e1bee7); }
-.theme-spring h1 { color: #6a1b9a; }
-.theme-spring button { background: #4a148c; }
+/* Dark overlay for text */
+.container { background: rgba(255,255,255,0.85); }
+.theme-halloween .container, .theme-pride .container { background: rgba(0,0,0,0.7); color: white; }
 
 @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
 
