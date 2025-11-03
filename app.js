@@ -108,23 +108,51 @@ function initializeFirebase() {
         app = firebase.initializeApp(firebaseConfig);
         database = firebase.database();
         db = database; // Alias for compatibility
+        
         firebaseInitialized = true;
         console.log('✅ Firebase initialized successfully');
         
-        // Test Firebase connection with timeout
+        // Connection monitoring with WebSocket error handling
         let connectionTimeout = setTimeout(() => {
             console.warn('⚠️ Firebase connection taking longer than expected...');
             showToast('Connecting to Firebase...', 'info');
         }, 3000);
         
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 3;
+        let isFirstConnection = true;
+        
         database.ref('.info/connected').on('value', (snap) => {
             clearTimeout(connectionTimeout);
+            
             if (snap.val() === true) {
                 console.log('✅ Connected to Firebase!');
-                showToast('Connected to Firebase!', 'success');
+                if (!isFirstConnection) {
+                    showToast('Reconnected to Firebase!', 'success');
+                } else {
+                    showToast('Connected to Firebase!', 'success');
+                    isFirstConnection = false;
+                }
+                reconnectAttempts = 0; // Reset on successful connection
             } else {
                 console.log('❌ Not connected to Firebase');
-                showToast('Reconnecting to Firebase...', 'error');
+                
+                // Try to reconnect if WebSocket failed
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    console.log(`🔄 Reconnection attempt ${reconnectAttempts}/${maxReconnectAttempts}...`);
+                    showToast(`Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`, 'error');
+                    
+                    // Force reconnection cycle
+                    setTimeout(() => {
+                        database.goOffline();
+                        setTimeout(() => {
+                            database.goOnline();
+                        }, 500);
+                    }, 1000);
+                } else {
+                    showToast('Connection failed. Please refresh the page.', 'error');
+                }
             }
         });
         
