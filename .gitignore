@@ -1,0 +1,22 @@
+# Firebase config with actual credentials (keep template only)
+# Uncomment this if you want to keep your config private:
+# app.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+.cache/

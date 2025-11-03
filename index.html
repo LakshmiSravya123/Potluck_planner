@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potluck Planner - Organize Your Perfect Gathering</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                        <path d="M7 2v20"></path>
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                    </svg>
+                    Potluck Planner
+                </h1>
+                <p class="tagline">Coordinate dishes, avoid duplicates, and make your gathering delicious!</p>
+            </div>
+        </header>
+
+        <!-- Event Setup Section -->
+        <section class="event-setup card">
+            <h2 class="section-title">Create or Join Event</h2>
+            <div class="event-controls">
+                <div class="input-group">
+                    <label for="eventCode">Event Code</label>
+                    <input type="text" id="eventCode" placeholder="Enter event code or leave blank to create new">
+                </div>
+                <div class="input-group">
+                    <label for="userName">Your Name</label>
+                    <input type="text" id="userName" placeholder="Enter your name" required>
+                </div>
+                <button id="joinEventBtn" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Join Event
+                </button>
+            </div>
+            <div id="eventInfo" class="event-info hidden">
+                <div class="event-code-display">
+                    <span class="label">Event Code:</span>
+                    <span id="currentEventCode" class="code"></span>
+                    <button id="copyCodeBtn" class="btn-icon" title="Copy code">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                <p class="share-text">Share this code with others to let them join!</p>
+            </div>
+        </section>
+
+        <!-- Add Dish Section -->
+        <section id="addDishSection" class="add-dish card hidden">
+            <h2 class="section-title">Add Your Dish</h2>
+            <form id="addDishForm" class="dish-form">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="dishName">Dish Name</label>
+                        <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="dishCategory">Category</label>
+                        <select id="dishCategory" required>
+                            <option value="">Select category</option>
+                            <option value="appetizer">Appetizer</option>
+                            <option value="main">Main Course</option>
+                            <option value="side">Side Dish</option>
+                            <option value="dessert">Dessert</option>
+                            <option value="beverage">Beverage</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="dishNotes">Notes (optional)</label>
+                    <input type="text" id="dishNotes" placeholder="e.g., Vegetarian, serves 8">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Dish
+                </button>
+            </form>
+        </section>
+
+        <!-- Dishes List Section -->
+        <section id="dishesSection" class="dishes-list card hidden">
+            <div class="section-header">
+                <h2 class="section-title">Event Menu</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="appetizer">Appetizers</button>
+                    <button class="filter-btn" data-category="main">Main</button>
+                    <button class="filter-btn" data-category="side">Sides</button>
+                    <button class="filter-btn" data-category="dessert">Desserts</button>
+                    <button class="filter-btn" data-category="beverage">Beverages</button>
+                </div>
+            </div>
+            <div id="dishesList" class="dishes-grid">
+                <!-- Dishes will be populated here -->
+            </div>
+            <div id="emptyState" class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                    <path d="M7 2v20"></path>
+                    <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                </svg>
+                <p>No dishes added yet. Be the first to contribute!</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
