@@ -96,23 +96,55 @@ const firebaseConfig = {
 
 // Initialize Firebase
 let app, database, db;
-try {
-    app = firebase.initializeApp(firebaseConfig);
-    database = firebase.database();
-    db = database; // Alias for compatibility
-    console.log('✅ Firebase initialized successfully');
-    
-    // Test Firebase connection
-    database.ref('.info/connected').on('value', (snap) => {
-        if (snap.val() === true) {
-            console.log('✅ Connected to Firebase!');
-        } else {
-            console.log('❌ Not connected to Firebase');
+let firebaseInitialized = false;
+
+function initializeFirebase() {
+    try {
+        if (typeof firebase === 'undefined') {
+            console.error('❌ Firebase SDK not loaded yet');
+            return false;
         }
-    });
-} catch (error) {
-    console.error("❌ Firebase initialization error:", error);
-    showToast("Please configure Firebase in app.js", "error");
+        
+        app = firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        db = database; // Alias for compatibility
+        firebaseInitialized = true;
+        console.log('✅ Firebase initialized successfully');
+        
+        // Test Firebase connection with timeout
+        let connectionTimeout = setTimeout(() => {
+            console.warn('⚠️ Firebase connection taking longer than expected...');
+            showToast('Connecting to Firebase...', 'info');
+        }, 3000);
+        
+        database.ref('.info/connected').on('value', (snap) => {
+            clearTimeout(connectionTimeout);
+            if (snap.val() === true) {
+                console.log('✅ Connected to Firebase!');
+                showToast('Connected to Firebase!', 'success');
+            } else {
+                console.log('❌ Not connected to Firebase');
+                showToast('Reconnecting to Firebase...', 'error');
+            }
+        });
+        
+        return true;
+    } catch (error) {
+        console.error("❌ Firebase initialization error:", error);
+        showToast("Firebase connection error: " + error.message, "error");
+        return false;
+    }
+}
+
+// Try to initialize immediately
+if (!initializeFirebase()) {
+    // If failed, retry after a delay
+    console.log('Retrying Firebase initialization in 2 seconds...');
+    setTimeout(() => {
+        if (!firebaseInitialized) {
+            initializeFirebase();
+        }
+    }, 2000);
 }
 
 // Photo Storage: Using base64 data URLs stored directly in Firebase
