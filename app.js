@@ -15,12 +15,14 @@ const slots = { 'Appetizers': 3, 'Main': 4, 'Dessert': 2, 'Drinks': 5 };
 
 // FREE 3D Models for AR
 const dishModels = {
-  'pizza': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Burger/glTF/Burger.glb',
-  'cake': 'https://modelviewer.dev/shared-assets/models/cake.glb',
-  'salad': 'https://modelviewer.dev/shared-assets/models/salad.glb',
-  'burger': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Burger/glTF/Burger.glb',
-  'sushi': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sushi/glTF/Sushi.glb',
-  'default': 'https://modelviewer.dev/shared-assets/models/Hotdog.glb'
+  'pizza': 'https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf',
+  'burger': 'https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf',
+  'cake': 'https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf',
+  'salad': 'https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf',
+  'sushi': 'https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf',
+  'taco': 'https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf',
+  'pasta': 'https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf',
+  'default': 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'
 };
 
 // THEME ENGINE: 20+ Themes!
@@ -137,22 +139,60 @@ function confirmDelete(id) {
 // AR Preview
 function showAR(itemId) {
   potluckRef.child(`items/${itemId}`).once('value', snap => {
+    if (!snap.exists()) {
+      alert('Dish not found!');
+      return;
+    }
+    
     const data = snap.val();
+    const dishName = data.dish.toLowerCase();
+    
+    // Find matching 3D model
     let modelUrl = dishModels['default'];
     for (const key in dishModels) {
-      if (data.dish.toLowerCase().includes(key)) {
+      if (dishName.includes(key)) {
         modelUrl = dishModels[key];
         break;
       }
     }
-    document.getElementById('ar-viewer').src = modelUrl;
-    document.getElementById('ar-modal').style.display = 'block';
+    
+    console.log('🎨 Loading AR model:', modelUrl, 'for dish:', data.dish);
+    
+    const viewer = document.getElementById('ar-viewer');
+    const modal = document.getElementById('ar-modal');
+    
+    // Show modal first
+    modal.style.display = 'block';
+    
+    // Load model
+    viewer.src = modelUrl;
+    
+    // Add loading indicator
+    viewer.addEventListener('load', () => {
+      console.log('✅ AR model loaded successfully!');
+    });
+    
+    viewer.addEventListener('error', (e) => {
+      console.error('❌ AR model failed to load:', e);
+      alert('Failed to load 3D model. Try another dish!');
+      closeAR();
+    });
+  }).catch(error => {
+    console.error('Error loading dish:', error);
+    alert('Error loading dish data!');
   });
 }
 
 function closeAR() {
-  document.getElementById('ar-modal').style.display = 'none';
-  document.getElementById('ar-viewer').src = '';
+  const modal = document.getElementById('ar-modal');
+  const viewer = document.getElementById('ar-viewer');
+  
+  modal.style.display = 'none';
+  
+  // Clear model after a delay to prevent flashing
+  setTimeout(() => {
+    viewer.src = '';
+  }, 300);
 }
 
 // Photo Upload & Gallery (using base64 to avoid CORS)
