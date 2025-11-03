@@ -14,10 +14,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app, database;
+let app, database, db;
 try {
     app = firebase.initializeApp(firebaseConfig);
     database = firebase.database();
+    db = database; // Alias for compatibility
     console.log('✅ Firebase initialized successfully');
     
     // Test Firebase connection
