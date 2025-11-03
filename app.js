@@ -242,10 +242,23 @@ function showEventInterface() {
     initializePhotoGallery();
     
     // Attach viral share and export listeners
-    document.getElementById('shareWhatsAppBtn')?.addEventListener('click', shareOnWhatsApp);
-    document.getElementById('shareTwitterBtn')?.addEventListener('click', shareOnTwitter);
-    document.getElementById('exportMenuBtn')?.addEventListener('click', exportMenu);
-    document.getElementById('voiceInputBtn')?.addEventListener('click', voiceInputDish);
+    const shareWhatsAppBtn = document.getElementById('shareWhatsAppBtn');
+    const shareTwitterBtn = document.getElementById('shareTwitterBtn');
+    const exportMenuBtn = document.getElementById('exportMenuBtn');
+    const voiceInputBtn = document.getElementById('voiceInputBtn');
+    
+    if (shareWhatsAppBtn) {
+        shareWhatsAppBtn.addEventListener('click', shareOnWhatsApp);
+    }
+    if (shareTwitterBtn) {
+        shareTwitterBtn.addEventListener('click', shareOnTwitter);
+    }
+    if (exportMenuBtn) {
+        exportMenuBtn.addEventListener('click', exportMenu);
+    }
+    if (voiceInputBtn) {
+        voiceInputBtn.addEventListener('click', voiceInputDish);
+    }
 }
 
 // Copy Event Code
