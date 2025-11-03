@@ -106,11 +106,23 @@
                 </div>
                 <h2 class="section-title">Add Your Dish</h2>
             </div>
+            
+            <!-- AI Suggestions Button -->
+            <button type="button" id="aiSuggestionsBtn" class="btn" style="width: 100%; margin-bottom: 1.5rem; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                    <path d="M2 12l10 5 10-5"></path>
+                </svg>
+                ✨ Get AI Dish Suggestions
+            </button>
+            
             <form id="addDishForm" class="dish-form">
                 <div class="form-row">
                     <div class="input-group">
-                        <label for="dishName">Dish Name</label>
+                        <label for="dishName">Dish Name ✨ AI-powered</label>
                         <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required>
+                        <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">Type a dish name to see AI-generated image preview</small>
                     </div>
                     <div class="input-group">
                         <label for="dishCategory">Category</label>
@@ -125,6 +137,10 @@
                         </select>
                     </div>
                 </div>
+                
+                <!-- AI Image Preview -->
+                <div id="dishImagePreview" style="display: none; margin: 1rem 0; padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; border: 2px dashed var(--primary-light);"></div>
+                
                 <div class="input-group">
                     <label for="dishNotes">Notes (optional)</label>
                     <input type="text" id="dishNotes" placeholder="e.g., Vegetarian, serves 8">

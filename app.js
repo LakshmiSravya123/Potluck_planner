@@ -30,6 +30,8 @@ let currentFilter = 'all';
 let currentTheme = 'default';
 let dishesListener = null;
 let themeListener = null;
+let currentDishImage = null;
+let imageSearchTimeout = null;
 
 // DOM Elements
 const eventCodeInput = document.getElementById('eventCode');
@@ -50,12 +52,18 @@ const dishesList = document.getElementById('dishesList');
 const emptyState = document.getElementById('emptyState');
 const filterButtons = document.querySelectorAll('.filter-btn');
 const toast = document.getElementById('toast');
+const dishImagePreview = document.getElementById('dishImagePreview');
+const aiSuggestionsBtn = document.getElementById('aiSuggestionsBtn');
 
 // Event Listeners
 joinEventBtn.addEventListener('click', handleJoinEvent);
 copyCodeBtn.addEventListener('click', copyEventCode);
 addDishForm.addEventListener('submit', handleAddDish);
 eventThemeInput.addEventListener('change', handleThemePreview);
+dishNameInput.addEventListener('input', handleDishNameInput);
+if (aiSuggestionsBtn) {
+    aiSuggestionsBtn.addEventListener('click', showAISuggestions);
+}
 filterButtons.forEach(btn => {
     btn.addEventListener('click', () => handleFilterChange(btn.dataset.category));
 });
@@ -205,6 +213,52 @@ function copyEventCode() {
         });
 }
 
+// Handle Dish Name Input - Search for images as user types
+function handleDishNameInput() {
+    const dishName = dishNameInput.value.trim();
+    
+    // Clear previous timeout
+    if (imageSearchTimeout) {
+        clearTimeout(imageSearchTimeout);
+    }
+    
+    // Hide preview if empty
+    if (!dishName) {
+        if (dishImagePreview) {
+            dishImagePreview.style.display = 'none';
+        }
+        currentDishImage = null;
+        return;
+    }
+    
+    // Debounce image search
+    imageSearchTimeout = setTimeout(() => {
+        searchDishImage(dishName);
+    }, 500);
+}
+
+// Search for dish image using Unsplash API
+async function searchDishImage(dishName) {
+    try {
+        // Using Unsplash Source API (no key needed for basic use)
+        const query = encodeURIComponent(dishName + ' food');
+        const imageUrl = `https://source.unsplash.com/400x300/?${query}`;
+        
+        currentDishImage = imageUrl;
+        
+        if (dishImagePreview) {
+            dishImagePreview.innerHTML = `
+                <img src="${imageUrl}" alt="${dishName}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 0.5rem;">
+                <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.5rem; text-align: center;">✨ AI-generated preview</p>
+            `;
+            dishImagePreview.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error fetching image:', error);
+        currentDishImage = null;
+    }
+}
+
 // Handle Add Dish
 function handleAddDish(e) {
     e.preventDefault();
@@ -226,11 +280,16 @@ function handleAddDish(e) {
         category: dishCategory,
         notes: dishNotes,
         contributor: currentUserName,
+        imageUrl: currentDishImage || null,
         createdAt: firebase.database.ServerValue.TIMESTAMP
     })
     .then(() => {
         showToast('Dish added successfully!', 'success');
         addDishForm.reset();
+        if (dishImagePreview) {
+            dishImagePreview.style.display = 'none';
+        }
+        currentDishImage = null;
     })
     .catch(error => {
         console.error('Error adding dish:', error);
@@ -320,6 +379,11 @@ function createDishCard(dish) {
     
     return `
         <div class="dish-card" data-category="${dish.category}">
+            ${dish.imageUrl ? `
+                <div class="dish-image" style="width: 100%; height: 200px; overflow: hidden;">
+                    <img src="${dish.imageUrl}" alt="${escapeHtml(dish.name)}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.style.display='none'">
+                </div>
+            ` : ''}
             <div class="dish-card-content">
                 <div class="dish-header">
                     <h3 class="dish-name">${escapeHtml(dish.name)}</h3>
@@ -404,6 +468,104 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.classList.add('hidden');
     }, 3000);
+}
+
+// AI Dish Suggestions based on theme
+function showAISuggestions() {
+    const suggestions = getThemeSuggestions(currentTheme);
+    
+    const suggestionHTML = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem;" onclick="this.remove()">
+            <div style="background: white; border-radius: 1rem; padding: 2rem; max-width: 600px; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900); margin: 0;">✨ AI Dish Suggestions</h3>
+                    <button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400);">&times;</button>
+                </div>
+                <p style="color: var(--gray-600); margin-bottom: 1.5rem;">Based on your ${themeNames[currentTheme] || currentTheme} theme:</p>
+                <div style="display: grid; gap: 0.75rem;">
+                    ${suggestions.map(dish => `
+                        <div style="padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; cursor: pointer; transition: all 0.2s;" 
+                             onmouseover="this.style.background='var(--primary-light)'; this.style.color='white';" 
+                             onmouseout="this.style.background='var(--gray-50)'; this.style.color='inherit';"
+                             onclick="useSuggestion('${dish.name}', '${dish.category}'); this.closest('div[style*=fixed]').remove();">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-size: 2rem;">${dish.emoji}</span>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 1rem;">${dish.name}</div>
+                                    <div style="font-size: 0.875rem; opacity: 0.8;">${dish.category} • ${dish.description}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', suggestionHTML);
+}
+
+function useSuggestion(name, category) {
+    dishNameInput.value = name;
+    dishCategoryInput.value = category;
+    handleDishNameInput(); // Trigger image search
+    showToast('Suggestion applied! ✨', 'success');
+}
+
+function getThemeSuggestions(theme) {
+    const suggestions = {
+        'default': [
+            { name: 'Caprese Skewers', category: 'appetizer', emoji: '🍅', description: 'Fresh and colorful' },
+            { name: 'BBQ Pulled Pork Sliders', category: 'main', emoji: '🍔', description: 'Crowd favorite' },
+            { name: 'Greek Salad', category: 'side', emoji: '🥗', description: 'Light and healthy' },
+            { name: 'Chocolate Brownies', category: 'dessert', emoji: '🍫', description: 'Classic sweet treat' },
+            { name: 'Fruit Punch', category: 'beverage', emoji: '🍹', description: 'Refreshing drink' }
+        ],
+        'birthday': [
+            { name: 'Mini Cupcakes', category: 'dessert', emoji: '🧁', description: 'Perfect party size' },
+            { name: 'Pizza Rolls', category: 'appetizer', emoji: '🍕', description: 'Kid-friendly' },
+            { name: 'Birthday Cake', category: 'dessert', emoji: '🎂', description: 'The star of the show' },
+            { name: 'Chicken Nuggets', category: 'main', emoji: '🍗', description: 'Always a hit' },
+            { name: 'Lemonade', category: 'beverage', emoji: '🍋', description: 'Sweet and tangy' }
+        ],
+        'christmas': [
+            { name: 'Honey Glazed Ham', category: 'main', emoji: '🍖', description: 'Holiday classic' },
+            { name: 'Gingerbread Cookies', category: 'dessert', emoji: '🍪', description: 'Festive favorite' },
+            { name: 'Roasted Vegetables', category: 'side', emoji: '🥕', description: 'Seasonal veggies' },
+            { name: 'Eggnog', category: 'beverage', emoji: '🥛', description: 'Traditional drink' },
+            { name: 'Cheese Board', category: 'appetizer', emoji: '🧀', description: 'Elegant starter' }
+        ],
+        'thanksgiving': [
+            { name: 'Roast Turkey', category: 'main', emoji: '🦃', description: 'Traditional centerpiece' },
+            { name: 'Pumpkin Pie', category: 'dessert', emoji: '🥧', description: 'Fall favorite' },
+            { name: 'Mashed Potatoes', category: 'side', emoji: '🥔', description: 'Comfort food' },
+            { name: 'Cranberry Sauce', category: 'side', emoji: '🍒', description: 'Sweet and tart' },
+            { name: 'Apple Cider', category: 'beverage', emoji: '🍎', description: 'Warm and cozy' }
+        ],
+        'halloween': [
+            { name: 'Mummy Hot Dogs', category: 'appetizer', emoji: '🌭', description: 'Spooky fun' },
+            { name: 'Witch Finger Cookies', category: 'dessert', emoji: '🍪', description: 'Creepy treats' },
+            { name: 'Pumpkin Soup', category: 'main', emoji: '🎃', description: 'Seasonal favorite' },
+            { name: 'Monster Cupcakes', category: 'dessert', emoji: '👻', description: 'Decorated delights' },
+            { name: 'Blood Orange Punch', category: 'beverage', emoji: '🍊', description: 'Eerie drink' }
+        ],
+        'summer': [
+            { name: 'Grilled Burgers', category: 'main', emoji: '🍔', description: 'BBQ essential' },
+            { name: 'Watermelon Salad', category: 'side', emoji: '🍉', description: 'Refreshing' },
+            { name: 'Ice Cream Sundaes', category: 'dessert', emoji: '🍨', description: 'Cool treat' },
+            { name: 'Corn on the Cob', category: 'side', emoji: '🌽', description: 'Summer staple' },
+            { name: 'Iced Tea', category: 'beverage', emoji: '🧊', description: 'Chilled drink' }
+        ],
+        'wedding': [
+            { name: 'Champagne Toast', category: 'beverage', emoji: '🥂', description: 'Celebration drink' },
+            { name: 'Wedding Cake', category: 'dessert', emoji: '🎂', description: 'Elegant centerpiece' },
+            { name: 'Salmon Filet', category: 'main', emoji: '🐟', description: 'Sophisticated choice' },
+            { name: 'Bruschetta', category: 'appetizer', emoji: '🍞', description: 'Classy starter' },
+            { name: 'Chocolate Truffles', category: 'dessert', emoji: '🍫', description: 'Decadent bites' }
+        ]
+    };
+    
+    return suggestions[theme] || suggestions['default'];
 }
 
 // Escape HTML to prevent XSS
