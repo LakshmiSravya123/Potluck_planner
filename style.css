@@ -1137,7 +1137,8 @@ body.theme-birthday .decorations::after {
 
 /* Form Grid Responsive */
 @media (max-width: 640px) {
-    .card [style*="grid-template-columns"] {
+    .card [style*="grid-template-columns"],
+    .event-controls [style*="grid-template-columns"] {
         grid-template-columns: 1fr !important;
     }
 }
