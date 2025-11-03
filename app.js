@@ -112,27 +112,10 @@ function initializeFirebase() {
         firebaseInitialized = true;
         console.log('✅ Firebase initialized successfully');
         
-        // Connection monitoring with WebSocket error handling
-        let connectionTimeout = setTimeout(() => {
-            console.warn('⚠️ Firebase connection taking longer than expected...');
-            showToast('Connecting to Firebase...', 'info');
-        }, 3000);
-        
-        let reconnectAttempts = 0;
-        const maxReconnectAttempts = 3;
-        let isFirstConnection = true;
-        
+        // Simple connection monitoring - no delays or toasts
         database.ref('.info/connected').on('value', (snap) => {
-            clearTimeout(connectionTimeout);
-            
             if (snap.val() === true) {
                 console.log('✅ Connected to Firebase!');
-                if (!isFirstConnection) {
-                    // Don't show reconnection toasts - too noisy
-                    console.log('🔄 Reconnected');
-                } else {
-                    isFirstConnection = false;
-                }
             } else {
                 console.log('⚠️ Firebase disconnected');
             }
@@ -323,12 +306,12 @@ function handleJoinEvent() {
         return;
     }
     
-    // Show loading state
+    currentUserName = userName;
+    
+    // Show loading state (instant)
     joinEventBtn.disabled = true;
-    const originalText = joinEventBtn.innerHTML;
     joinEventBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle></svg> Joining...';
     
-    currentUserName = userName;
     // Join existing event
     joinEvent(eventCode);
 }

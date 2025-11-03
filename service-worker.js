@@ -1,32 +1,35 @@
-const CACHE = 'potluck-v20251103221322';
-const FILES = [
-  '/Potluck_planner/',
-  '/Potluck_planner/index.html',
-  '/Potluck_planner/style.css',
-  '/Potluck_planner/app.js',
-  '/Potluck_planner/create.html',
-  '/Potluck_planner/manifest.json'
-];
+// Service Worker - Network First Strategy (faster, no stale cache)
+const CACHE = 'potluck-v20251103222000';
 
-// Install - cache files
+// Install immediately
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting())
-  );
+  self.skipWaiting();
 });
 
-// Activate - delete old caches
+// Activate and clear old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys => {
-      return Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)));
+      return Promise.all(keys.map(key => caches.delete(key)));
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch - serve from cache or network
+// Network first, cache fallback (faster, always fresh)
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    fetch(e.request)
+      .then(response => {
+        // Clone and cache the response
+        const responseClone = response.clone();
+        caches.open(CACHE).then(cache => {
+          cache.put(e.request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => {
+        // Fallback to cache if network fails
+        return caches.match(e.request);
+      })
   );
 });
