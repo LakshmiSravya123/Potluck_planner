@@ -72,36 +72,58 @@ let allDishes = [];
 
 // Check URL for event code parameter (from QR code or shared link)
 function checkUrlParameters() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const codeFromUrl = urlParams.get('code');
-    
-    console.log('Checking URL parameters:', { codeFromUrl, hasInput: !!eventCodeInput });
-    
-    if (codeFromUrl && eventCodeInput) {
-        // Auto-fill event code from URL
-        eventCodeInput.value = codeFromUrl.toUpperCase();
-        console.log('Event code auto-filled:', codeFromUrl.toUpperCase());
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const codeFromUrl = urlParams.get('code');
         
-        // Focus on name input
-        if (userNameInput) {
-            userNameInput.focus();
+        console.log('🔍 URL Check:', { 
+            url: window.location.href,
+            codeFromUrl, 
+            hasInput: !!eventCodeInput,
+            inputValue: eventCodeInput?.value 
+        });
+        
+        if (codeFromUrl) {
+            const codeUpper = codeFromUrl.toUpperCase();
+            
+            if (eventCodeInput) {
+                eventCodeInput.value = codeUpper;
+                console.log('✅ Event code auto-filled:', codeUpper);
+                
+                // Focus on name input
+                if (userNameInput) {
+                    userNameInput.focus();
+                }
+                
+                // Show toast notification
+                setTimeout(() => {
+                    try {
+                        showToast('🎉 Event code loaded! Enter your name to join.', 'success');
+                    } catch (e) {
+                        console.log('Toast not ready yet');
+                    }
+                }, 1000);
+            } else {
+                console.error('❌ Event code input not found!');
+            }
+        } else {
+            console.log('ℹ️ No code parameter in URL');
         }
-        // Show a hint
-        setTimeout(() => {
-            showToast('🎉 Event code loaded! Enter your name to join.', 'success');
-        }, 500);
+    } catch (error) {
+        console.error('Error checking URL parameters:', error);
     }
 }
 
-// Run on page load
-window.addEventListener('DOMContentLoaded', checkUrlParameters);
-// Also run immediately in case DOMContentLoaded already fired
+// Run on page load with multiple fallbacks
 if (document.readyState === 'loading') {
-    // Still loading, wait for DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', checkUrlParameters);
 } else {
-    // DOM is ready, run now
     checkUrlParameters();
 }
+
+// Also try after a short delay to ensure DOM is ready
+setTimeout(checkUrlParameters, 100);
+setTimeout(checkUrlParameters, 500);
 
 // Event Listeners
 joinEventBtn.addEventListener('click', handleJoinEvent);
