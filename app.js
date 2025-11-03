@@ -59,6 +59,25 @@ document.body.classList.add(`theme-${detectedTheme}`);
 document.getElementById('theme-decor').innerHTML = getThemeHeader(detectedTheme);
 initParticles(detectedTheme);
 
+//// Load event from Firebase
+potluckRef.child('meta').once('value', snap => {
+  if (snap.val()) {
+    const meta = snap.val();
+    document.getElementById('event-title').innerText = meta.name;
+    if (!urlTheme) {
+      detectedTheme = meta.theme;
+      applyTheme(detectedTheme);
+    }
+  }
+});
+
+function applyTheme(theme) {
+  document.body.className = ''; // Reset
+  document.body.classList.add(`theme-${theme}`);
+  document.getElementById('theme-decor').innerHTML = getThemeHeader(theme);
+  initParticles(theme);
+}
+
 // Add Item with Slot Check
 function addItem() {
   const name = document.getElementById('name').value.trim();
