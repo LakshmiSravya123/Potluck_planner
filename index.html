@@ -53,24 +53,28 @@
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
                 </div>
-                <h2 class="section-title">Create or Join Event</h2>
+                <h2 class="section-title">Join Event</h2>
+                <p style="color: var(--gray-600); font-size: 0.875rem; margin-top: 0.5rem;">
+                    Need to create an event? <a href="create.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Create New Event →</a>
+                </p>
             </div>
             <div class="event-controls">
                 <!-- Compact 2-column layout -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="input-group">
-                        <label for="eventCode">Event Code (optional)</label>
-                        <input type="text" id="eventCode" placeholder="Leave blank to create new">
+                        <label for="eventCode">Event Code *</label>
+                        <input type="text" id="eventCode" placeholder="Enter event code" required>
                     </div>
                     <div class="input-group">
-                        <label for="userName">Your Name</label>
+                        <label for="userName">Your Name *</label>
                         <input type="text" id="userName" placeholder="Enter your name" required>
                     </div>
                 </div>
                 
-                <div class="input-group">
-                    <label for="eventTheme">Event Theme</label>
-                    <select id="eventTheme" required>
+                <input type="hidden" id="eventTheme" value="default">
+                
+                <!-- Hidden theme selector (not shown, will be loaded from event data) -->
+                <select id="eventTheme" style="display: none;" required>
                         <option value="default">🎉 Default Party</option>
                         <option value="birthday">🎂 Birthday</option>
                         <option value="christmas">🎄 Christmas</option>
@@ -116,21 +120,60 @@
                     Join Event
                 </button>
             </div>
+            <!-- Event Details Card (shown after joining) -->
+            <div id="eventDetailsCard" class="card hidden" style="margin-top: 1.5rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📋</span> Event Details
+                </h3>
+                
+                <div style="display: grid; gap: 1rem;">
+                    <!-- Event Name & Code -->
+                    <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem;">
+                        <div style="font-size: 1.125rem; font-weight: 700; color: var(--primary); margin-bottom: 0.25rem;" id="eventName">Loading...</div>
+                        <div style="font-size: 0.875rem; color: var(--gray-600);">
+                            Code: <span id="currentEventCode" style="font-weight: 600; color: var(--gray-900);"></span>
+                            <button id="copyCodeBtn" class="btn" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Date, Time, Location Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                        <div id="eventDateSection" style="display: none;">
+                            <div style="font-size: 0.75rem; color: var(--gray-600); font-weight: 600; margin-bottom: 0.25rem;">📅 DATE</div>
+                            <div id="eventDate" style="font-size: 0.9375rem; color: var(--gray-900);"></div>
+                        </div>
+                        <div id="eventTimeSection" style="display: none;">
+                            <div style="font-size: 0.75rem; color: var(--gray-600); font-weight: 600; margin-bottom: 0.25rem;">🕐 TIME</div>
+                            <div id="eventTime" style="font-size: 0.9375rem; color: var(--gray-900);"></div>
+                        </div>
+                        <div id="eventHostSection" style="display: none;">
+                            <div style="font-size: 0.75rem; color: var(--gray-600); font-weight: 600; margin-bottom: 0.25rem;">👤 HOST</div>
+                            <div id="eventHost" style="font-size: 0.9375rem; color: var(--gray-900);"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Location with Map -->
+                    <div id="eventLocationSection" style="display: none;">
+                        <div style="font-size: 0.75rem; color: var(--gray-600); font-weight: 600; margin-bottom: 0.5rem;">📍 LOCATION</div>
+                        <div id="eventLocation" style="font-size: 0.9375rem; color: var(--gray-900); margin-bottom: 0.75rem;"></div>
+                        <div id="eventMap" style="width: 100%; height: 200px; border-radius: 0.5rem; overflow: hidden; background: var(--gray-100); display: flex; align-items: center; justify-content: center; color: var(--gray-500);">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🗺️</div>
+                                <div style="font-size: 0.875rem;">Map preview</div>
+                                <a id="mapLink" href="#" target="_blank" style="color: var(--primary); font-size: 0.8125rem; margin-top: 0.25rem; display: inline-block;">Open in Google Maps →</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Theme Badge -->
+                    <div>
+                        <div style="font-size: 0.75rem; color: var(--gray-600); font-weight: 600; margin-bottom: 0.5rem;">🎨 THEME</div>
+                        <span id="currentEventTheme" class="theme-badge"></span>
+                    </div>
+                </div>
+            </div>
+            
             <div id="eventInfo" class="event-info hidden">
-                <div class="event-code-display">
-                    <span class="label">Event Code:</span>
-                    <span id="currentEventCode" class="code"></span>
-                    <button id="copyCodeBtn" class="btn-icon" title="Copy code">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    </button>
-                </div>
-                <div class="event-theme-display">
-                    <span class="label">Theme:</span>
-                    <span id="currentEventTheme" class="theme-badge"></span>
-                </div>
                 <div class="event-stats" style="display: flex; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span style="font-size: 1.5rem;">🍽️</span>

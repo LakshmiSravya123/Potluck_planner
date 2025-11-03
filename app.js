@@ -266,28 +266,24 @@ function applyTheme(theme) {
     createDecorations(theme);
 }
 
-// Handle Join/Create Event
+// Handle Join Event (creation moved to create.html)
 function handleJoinEvent() {
     const userName = userNameInput.value.trim();
-    const theme = eventThemeInput.value;
+    const eventCode = eventCodeInput.value.trim().toLowerCase();
     
     if (!userName) {
         showToast('Please enter your name', 'error');
         return;
     }
     
-    currentUserName = userName;
-    currentTheme = theme;
-    let eventCode = eventCodeInput.value.trim().toLowerCase();
-    
     if (!eventCode) {
-        // Create new event
-        eventCode = generateEventCode();
-        createEvent(eventCode, theme);
-    } else {
-        // Join existing event
-        joinEvent(eventCode);
+        showToast('Please enter an event code. To create a new event, visit create.html', 'error');
+        return;
     }
+    
+    currentUserName = userName;
+    // Join existing event
+    joinEvent(eventCode);
 }
 
 // Generate Random Event Code
@@ -350,6 +346,10 @@ function joinEvent(eventCode) {
                 eventThemeInput.value = theme;
                 applyTheme(theme);
                 showEventInterface();
+                
+                // Populate event metadata
+                populateEventMetadata(eventData);
+                
                 listenToDishes();
                 listenToTheme();
                 showToast('Joined event successfully!', 'success');
@@ -359,9 +359,82 @@ function joinEvent(eventCode) {
             }
         })
         .catch(error => {
-            console.error('🔥 Firebase error:', error);
+            console.error(' Firebase error:', error);
             showToast('Failed to join event: ' + error.message, 'error');
         });
+}
+
+// Populate Event Metadata
+function populateEventMetadata(eventData) {
+    const eventDetailsCard = document.getElementById('eventDetailsCard');
+    if (!eventDetailsCard) return;
+    
+    // Show the card
+    eventDetailsCard.classList.remove('hidden');
+    
+    // Event name
+    const eventNameEl = document.getElementById('eventName');
+    if (eventNameEl && eventData.name) {
+        eventNameEl.textContent = eventData.name;
+    }
+    
+    // Date
+    if (eventData.date) {
+        const dateSection = document.getElementById('eventDateSection');
+        const dateEl = document.getElementById('eventDate');
+        if (dateSection && dateEl) {
+            const date = new Date(eventData.date);
+            dateEl.textContent = date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            dateSection.style.display = 'block';
+        }
+    }
+    
+    // Time
+    if (eventData.time) {
+        const timeSection = document.getElementById('eventTimeSection');
+        const timeEl = document.getElementById('eventTime');
+        if (timeSection && timeEl) {
+            timeEl.textContent = eventData.time;
+            timeSection.style.display = 'block';
+        }
+    }
+    
+    // Host
+    if (eventData.host && eventData.host.name) {
+        const hostSection = document.getElementById('eventHostSection');
+        const hostEl = document.getElementById('eventHost');
+        if (hostSection && hostEl) {
+            hostEl.textContent = eventData.host.name;
+            if (eventData.host.email) {
+                hostEl.innerHTML = `${eventData.host.name}<br><a href="mailto:${eventData.host.email}" style="font-size: 0.8125rem; color: var(--primary);">${eventData.host.email}</a>`;
+            }
+            hostSection.style.display = 'block';
+        }
+    }
+    
+    // Location with map
+    if (eventData.location) {
+        const locationSection = document.getElementById('eventLocationSection');
+        const locationEl = document.getElementById('eventLocation');
+        const mapLink = document.getElementById('mapLink');
+        
+        if (locationSection && locationEl) {
+            locationEl.textContent = eventData.location;
+            
+            // Create Google Maps link
+            if (mapLink) {
+                const encodedLocation = encodeURIComponent(eventData.location);
+                mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`;
+            }
+            
+            locationSection.style.display = 'block';
+        }
+    }
 }
 
 // Show Event Interface
