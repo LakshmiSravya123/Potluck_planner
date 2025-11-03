@@ -113,12 +113,25 @@
         </select>
       </div>
 
-      <button onclick="createPotluckEvent()" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button id="createEventBtn" onclick="createPotluckEvent()" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+        <svg id="createIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 5v14M5 12h14"></path>
         </svg>
-        Create Event & Get Link
+        <span id="createBtnText">Create Event & Get Link</span>
+        <span id="createLoader" style="display: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+            <circle cx="12" cy="12" r="10"></circle>
+          </svg>
+          Creating...
+        </span>
       </button>
+      
+      <style>
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      </style>
     </div>
 
     <!-- Result Card -->
@@ -189,6 +202,19 @@
         return;
       }
       
+      // Show loading state
+      const btn = document.getElementById('createEventBtn');
+      const btnText = document.getElementById('createBtnText');
+      const btnIcon = document.getElementById('createIcon');
+      const loader = document.getElementById('createLoader');
+      
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnIcon.style.display = 'none';
+      loader.style.display = 'inline-flex';
+      loader.style.alignItems = 'center';
+      loader.style.gap = '0.5rem';
+      
       // Get and validate inputs
       const name = document.getElementById('new-event-name').value.trim();
       const eventDate = document.getElementById('event-date').value;
@@ -198,21 +224,33 @@
       const hostEmail = document.getElementById('host-email').value.trim();
       const theme = document.getElementById('new-theme').value;
       
+      // Helper to reset button state
+      function resetButton() {
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnIcon.style.display = 'inline';
+        loader.style.display = 'none';
+      }
+      
       // Validation
       if (!name || name.length < 3) {
         alert('❌ Please enter an event name (at least 3 characters)');
+        resetButton();
         return;
       }
       if (!eventDate) {
         alert('❌ Please select an event date');
+        resetButton();
         return;
       }
       if (!hostName || hostName.length < 2) {
         alert('❌ Please enter your name as the host');
+        resetButton();
         return;
       }
       if (hostEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(hostEmail)) {
         alert('❌ Please enter a valid email address');
+        resetButton();
         return;
       }
       
@@ -243,6 +281,14 @@
       };
       
       db.ref(`events/${id.toLowerCase()}`).set(eventData).then(() => {
+        // Update button to success state
+        loader.innerHTML = '✅ Created!';
+        setTimeout(() => {
+          loader.style.display = 'none';
+          btnText.textContent = '✅ Event Created';
+          btnText.style.display = 'inline';
+        }, 500);
+        
         // Show result card
         document.getElementById('result-card').style.display = 'block';
         document.getElementById('share-link').innerHTML = `
@@ -268,7 +314,8 @@
         console.log('✅ Event created:', id);
       }).catch(err => {
         console.error('❌ Error creating event:', err);
-        alert('Error creating event: ' + err.message);
+        alert('❌ Error creating event: ' + err.message);
+        resetButton();
       });
     }
     

@@ -1137,6 +1137,15 @@ body.theme-birthday .decorations::after {
     }
 }
 
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* Form Grid Responsive */
 @media (max-width: 640px) {
     .card [style*="grid-template-columns"],

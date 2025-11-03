@@ -281,6 +281,11 @@ function handleJoinEvent() {
         return;
     }
     
+    // Show loading state
+    joinEventBtn.disabled = true;
+    const originalText = joinEventBtn.innerHTML;
+    joinEventBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle></svg> Joining...';
+    
     currentUserName = userName;
     // Join existing event
     joinEvent(eventCode);
