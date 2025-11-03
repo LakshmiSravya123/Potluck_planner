@@ -46,6 +46,61 @@ body {
     overflow-x: hidden;
 }
 
+/* Theme Background Images */
+body[data-theme="birthday"] {
+    background: linear-gradient(rgba(255, 107, 107, 0.85), rgba(255, 159, 243, 0.85)),
+                url('https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
+body[data-theme="christmas"] {
+    background: linear-gradient(rgba(165, 42, 42, 0.85), rgba(34, 139, 34, 0.85)),
+                url('https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
+body[data-theme="thanksgiving"] {
+    background: linear-gradient(rgba(205, 133, 63, 0.85), rgba(139, 69, 19, 0.85)),
+                url('https://images.unsplash.com/photo-1574672280600-4accfa5b6f98?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
+body[data-theme="halloween"] {
+    background: linear-gradient(rgba(75, 0, 130, 0.85), rgba(255, 140, 0, 0.85)),
+                url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
+body[data-theme="newyear"] {
+    background: linear-gradient(rgba(255, 215, 0, 0.85), rgba(255, 20, 147, 0.85)),
+                url('https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
+body[data-theme="summer"] {
+    background: linear-gradient(rgba(255, 193, 7, 0.85), rgba(3, 169, 244, 0.85)),
+                url('https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
+body[data-theme="spring"] {
+    background: linear-gradient(rgba(255, 182, 193, 0.85), rgba(144, 238, 144, 0.85)),
+                url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
+body[data-theme="wedding"] {
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 192, 203, 0.9)),
+                url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
+body[data-theme="graduation"] {
+    background: linear-gradient(rgba(0, 51, 102, 0.85), rgba(255, 215, 0, 0.85)),
+                url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920&q=80') center/cover fixed;
+    animation: none;
+}
+
 body::before {
     content: '';
     position: fixed;

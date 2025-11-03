@@ -103,10 +103,10 @@ const themeNames = {
 
 // Apply Theme
 function applyTheme(theme) {
-    // Remove all theme classes
-    document.body.className = '';
-    // Add new theme class
-    document.body.classList.add(`theme-${theme}`);
+    // Set data-theme attribute for background images
+    document.body.setAttribute('data-theme', theme);
+    // Also keep theme class for other styling
+    document.body.className = `theme-${theme}`;
     currentTheme = theme;
     // Update theme display if visible
     if (currentEventThemeDisplay) {
