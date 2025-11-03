@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Potluck Planner</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="preload" href="style.css" as="style">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
@@ -14,6 +15,41 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#e91e63" />
+  <script>
+    // Apply theme immediately to prevent flash
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const theme = urlParams.get('theme');
+      const eventId = urlParams.get('id') || 'default-event';
+      
+      // Theme detection from event ID
+      const themeKeywords = {
+        birthday: ['birthday', 'bday', 'cake'],
+        christmas: ['christmas', 'xmas', 'holiday'],
+        halloween: ['halloween', 'spooky', 'pumpkin'],
+        valentines: ['valentine', 'love', 'heart'],
+        diwali: ['diwali', 'festival', 'lights'],
+        thanksgiving: ['thanksgiving', 'turkey', 'fall'],
+        newyear: ['newyear', 'nye'],
+        easter: ['easter', 'bunny', 'egg'],
+        bbq: ['bbq', 'grill', 'summer'],
+        beach: ['beach', 'pool', 'luau']
+      };
+      
+      let detectedTheme = theme || 'neutral';
+      if (!theme) {
+        for (const [key, words] of Object.entries(themeKeywords)) {
+          if (words.some(word => eventId.toLowerCase().includes(word))) {
+            detectedTheme = key;
+            break;
+          }
+        }
+      }
+      
+      document.documentElement.className = `theme-${detectedTheme}`;
+      document.body.className = `theme-${detectedTheme}`;
+    })();
+  </script>
 </head>
 <body>
   <div id="theme-decor"></div>

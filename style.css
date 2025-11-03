@@ -1,127 +1,333 @@
+/* style.css - FULL MODERN GLASSMORPHISM UI WITH THEME IMAGES */
+/* Copy-paste this ENTIRE file into your repo's style.css */
+/* Features: Glass cards, neon hovers, animations, dark mode, real image backgrounds! */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --text: #ffffff;
+  --accent: #ff6d00;
+  --card-bg: rgba(255, 255, 255, 0.15);
+  --input-bg: rgba(255, 255, 255, 0.2);
+  --button-bg: linear-gradient(45deg, #007bff, #0056b3);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.dark {
+  --bg: #121212;
+  --text: #eeeeee;
+  --accent: #bb86fc;
+  --card-bg: rgba(30, 30, 30, 0.8);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --button-bg: linear-gradient(45deg, #bb86fc, #9f6bdb);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 20px;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  background-repeat: no-repeat;
-  transition: background 1s ease;
+  color: var(--text);
+  transition: all 0.5s ease;
+  min-height: 100vh;
 }
 
+/* GLASS CONTAINER */
 .container {
   max-width: 700px;
-  margin: auto;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
+  margin: 40px auto;
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
   padding: 40px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
-  z-index: 2;
+  animation: fadeIn 1s ease-out;
+  overflow: hidden;
 }
 
-/* Mobile backdrop-filter fix */
-@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
-  .container { 
-    background: rgba(255,255,255,0.95);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-  }
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-#theme-decor { text-align: center; font-size: 3rem; margin-bottom: 20px; animation: float 4s infinite; }
-
-/* Neutral */
-h1 { color: #333; }
-
-/* THEME BACKGROUNDS - REAL IMAGES! */
-.theme-birthday { background: url('https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-christmas { background: url('https://images.unsplash.com/photo-1543589077-47c01b3f6483?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-halloween { background: url('https://images.unsplash.com/photo-1608513037773-9b40b056a7b4?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-valentines { background: url('https://images.unsplash.com/photo-1516585420163-5c8d7e5e6a3f?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-diwali { background: url('https://images.unsplash.com/photo-1570449848762-4e5a7e3d0586?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-thanksgiving { background: url('https://images.unsplash.com/photo-1574672280600-4accfa5b6f98?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-newyear { background: url('https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-easter { background: url('https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-bbq { background: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-beach { background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-wedding { background: url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-babyshower { background: url('https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-graduation { background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-superbowl { background: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-cinco { background: url('https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-pride { background: url('https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-ramadan { background: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-hanukkah { background: url('https://images.unsplash.com/photo-1608233847894-4e9c1f9c7b5e?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-autumn { background: url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1920&q=80') center/cover fixed no-repeat; }
-.theme-spring { background: url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&q=80') center/cover fixed no-repeat; }
-
-/* Dark overlay for text */
-.container { background: rgba(255,255,255,0.85); }
-.theme-halloween .container, .theme-pride .container { background: rgba(0,0,0,0.7); color: white; }
-
-@keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
-
-/* Form Styles */
-h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
-.form, .ai-section { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
-input, select, button { padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; font-family: 'Poppins', sans-serif; }
-input, select { flex: 1; min-width: 150px; }
-button { background: #4CAF50; color: white !important; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s; }
-button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-
-/* Override theme button colors to ensure visibility */
-.theme-birthday button,
-.theme-christmas button,
-.theme-halloween button,
-.theme-valentines button,
-.theme-diwali button,
-.theme-thanksgiving button,
-.theme-newyear button,
-.theme-easter button,
-.theme-bbq button,
-.theme-beach button,
-.theme-wedding button,
-.theme-babyshower button,
-.theme-graduation button,
-.theme-superbowl button,
-.theme-cinco button,
-.theme-pride button,
-.theme-ramadan button,
-.theme-hanukkah button,
-.theme-autumn button,
-.theme-spring button {
-  color: white !important;
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
-/* Item List */
-.item { background: #f0f8ff; padding: 15px; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s; }
-.item:hover { transform: translateX(5px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.item .diet { font-size: 11px; color: #e91e63; font-weight: bold; background: #ffe0e9; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
-.ar-btn, .edit, .remove { background: #9c27b0; color: white; border: none; padding: 6px 12px; border-radius: 20px; margin-left: 5px; cursor: pointer; font-size: 12px; }
-.edit { background: #2196F3; }
-.remove { background: #f44336; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
 
-/* Photo Gallery */
-.photo-card { display: inline-block; margin: 10px; text-align: center; }
-.photo-card img { width: 120px; height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.photo-card p { font-size: 12px; margin-top: 5px; }
+@keyframes glow {
+  0% { box-shadow: 0 0 5px var(--accent); }
+  50% { box-shadow: 0 0 20px var(--accent); }
+  100% { box-shadow: 0 0 5px var(--accent); }
+}
 
-/* Bingo Table */
-table { border-collapse: collapse; margin: 20px auto; }
-td { border: 2px solid #ddd; padding: 15px; text-align: center; font-size: 14px; cursor: pointer; transition: all 0.3s; background: white; }
-td:hover { background: #fffacd; }
+/* HEADER & DECOR */
+h1 {
+  text-align: center;
+  font-size: 3.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #ff6d00, #e91e63, #9c27b0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 10px;
+  animation: bounce 3s infinite;
+}
 
-/* QR Code */
-#qr { text-align: center; margin: 20px 0; }
+#event-title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin: 10px 0 30px;
+  color: var(--accent);
+  font-style: italic;
+}
 
-/* Responsive */
+#theme-decor {
+  text-align: center;
+  font-size: 4rem;
+  margin: 20px 0;
+  animation: glow 2s infinite;
+}
+
+/* FORM GRID */
+.form, .ai-section, .organizer-tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin: 30px 0;
+}
+
+input, select {
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus, select:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  transform: scale(1.02);
+}
+
+/* BUTTONS - NEON HOVER MAGIC */
+button {
+  padding: 16px 24px;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+  overflow: hidden;
+  background: var(--button-bg);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: pulse 2s infinite;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s;
+}
+
+button:hover::before {
+  left: 100%;
+}
+
+button:hover {
+  transform: translateY(-5px) scale(1.08);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  animation: glow 1.5s infinite;
+}
+
+button:active {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Special Buttons */
+.ar-btn {
+  background: linear-gradient(45deg, #9c27b0, #6a1b9a);
+  padding: 10px 18px;
+  font-size: 0.9rem;
+}
+
+.edit, .remove {
+  background: linear-gradient(45deg, #ff9800, #f57c00);
+  padding: 8px 14px;
+  font-size: 0.8rem;
+}
+
+/* DISH ITEMS */
+.item {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.4s ease;
+  animation: fadeIn 0.6s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.item:hover {
+  transform: translateX(12px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.diet {
+  background: var(--accent);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+}
+
+/* PHOTO GALLERY */
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.photo-card img {
+  border-radius: 12px;
+  width: 100%;
+  transition: transform 0.3s;
+}
+
+.photo-card img:hover {
+  transform: scale(1.1);
+}
+
+/* MAP */
+#map {
+  height: 300px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin: 20px 0;
+}
+
+/* QR & BINGO */
+#qr, #bingo-card {
+  text-align: center;
+  margin: 20px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+td {
+  border: 2px solid var(--accent);
+  padding: 20px;
+  text-align: center;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+td:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* SHARE BUTTONS */
+.share button {
+  background: linear-gradient(45deg, #25d366, #128c7e); /* WhatsApp */
+}
+
+.share button:last-child {
+  background: linear-gradient(45deg, #1da1f2, #0d8bd9); /* X */
+}
+
+/* DARK MODE TOGGLE */
+#dark-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  animation: bounce 2s infinite;
+}
+
+/* THEME IMAGE BACKGROUNDS */
+.theme-birthday { background-image: url('https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-christmas { background-image: url('https://images.unsplash.com/photo-1543589077-47c01b3f6483?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-halloween { background-image: url('https://images.unsplash.com/photo-1608513037773-9b40b056a7b4?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-valentines { background-image: url('https://images.unsplash.com/photo-1516585420163-5c8d7e5e6a3f?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-diwali { background-image: url('https://images.unsplash.com/photo-1570449848762-4e5a7e3d0586?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-thanksgiving { background-image: url('https://images.unsplash.com/photo-1571167398043-9e8db5d4b8e9?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-newyear { background-image: url('https://images.unsplash.com/photo-1541534741688-6078c6bfb5d5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-easter { background-image: url('https://images.unsplash.com/photo-1582582484031-0d5a4e1e0a0e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-bbq { background-image: url('https://images.unsplash.com/photo-1529193591184-b1b7b2c8e2e8?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-beach { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-wedding { background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-babyshower { background-image: url('https://images.unsplash.com/photo-1609951651556-5334e2706168?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-graduation { background-image: url('https://images.unsplash.com/photo-1523050858586-54b946a4e7e5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-superbowl { background-image: url('https://images.unsplash.com/photo-1518614369274-2c00e6e0b5e5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-cinco { background-image: url('https://images.unsplash.com/photo-1558452918-35c7b7e60455?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-pride { background-image: url('https://images.unsplash.com/photo-1599305445678-4a525b5e5b5e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-ramadan { background-image: url('https://images.unsplash.com/photo-1580486877305-0e5e3e1e8c0d?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-hanukkah { background-image: url('https://images.unsplash.com/photo-1541605357697-6f4e2e3e5e5e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-autumn { background-image: url('https://images.unsplash.com/photo-1507487369694-724a9c7e9c3e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+.theme-spring { background-image: url('https://images.unsplash.com/photo-1495231916356-a86217e8817e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+
+/* READABILITY FIX */
+.container { background: rgba(255, 255, 255, 0.85); }
+.theme-halloween .container, .theme-pride .container { background: rgba(0, 0, 0, 0.7); color: white; }
+
+/* MOBILE OPTIMIZED */
 @media (max-width: 600px) {
-  .container { padding: 20px; }
-  input, select, button { min-width: 100%; }
-  .item { flex-direction: column; align-items: flex-start; }
+  .container { padding: 20px; margin: 20px 10px; }
+  h1 { font-size: 2.5rem; }
+  button { padding: 14px 20px; font-size: 0.9rem; }
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  animation: fadeIn 2s ease-out;
 }
