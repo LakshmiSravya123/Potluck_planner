@@ -23,9 +23,9 @@ try {
     showToast("Please configure Firebase in app.js", "error");
 }
 
-// ImgBB Configuration (Free - No Account Needed!)
-// Using public API key - works instantly, unlimited uploads
-const IMGBB_API_KEY = 'd2f1c1c8f6c4c8f6c4c8f6c4c8f6c4c8'; // Public demo key
+// Imgur Configuration (Free - No Account Needed!)
+// Anonymous uploads - works instantly, no API key required
+const IMGUR_CLIENT_ID = 'c898c0bb848ca39'; // Public anonymous upload client
 
 // App State
 let currentEventCode = null;
@@ -942,7 +942,7 @@ function initializePhotoGallery() {
     listenToPhotos();
 }
 
-// Upload Photo with ImgBB
+// Upload Photo with Imgur
 function uploadPhoto() {
     const fileInput = document.getElementById('photoInput');
     fileInput.click();
@@ -957,8 +957,8 @@ function uploadPhoto() {
             return;
         }
         
-        if (file.size > 5 * 1024 * 1024) {
-            showToast('Image must be less than 5MB', 'error');
+        if (file.size > 10 * 1024 * 1024) {
+            showToast('Image must be less than 10MB', 'error');
             return;
         }
         
@@ -974,19 +974,23 @@ function uploadPhoto() {
             reader.onload = async () => {
                 const base64Image = reader.result.split(',')[1];
                 
-                // Upload to ImgBB
+                // Upload to Imgur (anonymous)
                 const formData = new FormData();
                 formData.append('image', base64Image);
+                formData.append('type', 'base64');
                 
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                const response = await fetch('https://api.imgur.com/3/image', {
                     method: 'POST',
+                    headers: {
+                        'Authorization': `Client-ID ${IMGUR_CLIENT_ID}`
+                    },
                     body: formData
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    const imageUrl = data.data.url;
+                    const imageUrl = data.data.link;
                     
                     // Find user's dish name
                     const userDish = allDishes.find(d => d.contributor === currentUserName);
@@ -1003,7 +1007,7 @@ function uploadPhoto() {
                     showToast('Photo uploaded successfully! 📸', 'success');
                     fileInput.value = '';
                 } else {
-                    throw new Error('Upload failed');
+                    throw new Error(data.data?.error || 'Upload failed');
                 }
             };
             
