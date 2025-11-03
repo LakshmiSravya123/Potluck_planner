@@ -18,8 +18,18 @@ let app, database;
 try {
     app = firebase.initializeApp(firebaseConfig);
     database = firebase.database();
+    console.log('✅ Firebase initialized successfully');
+    
+    // Test Firebase connection
+    database.ref('.info/connected').on('value', (snap) => {
+        if (snap.val() === true) {
+            console.log('✅ Connected to Firebase!');
+        } else {
+            console.log('❌ Not connected to Firebase');
+        }
+    });
 } catch (error) {
-    console.error("Firebase initialization error:", error);
+    console.error("❌ Firebase initialization error:", error);
     showToast("Please configure Firebase in app.js", "error");
 }
 
