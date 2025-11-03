@@ -1,3 +1,84 @@
+// ============================================
+// UTILITY FUNCTIONS - Input Validation & Sanitization
+// ============================================
+
+// Sanitize user input to prevent XSS attacks
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return '';
+    return input
+        .trim()
+        .replace(/[<>]/g, '') // Remove < and > to prevent HTML injection
+        .substring(0, 200); // Limit length
+}
+
+// Validate event code format
+function validateEventCode(code) {
+    return /^[A-Z0-9]{6,10}$/i.test(code);
+}
+
+// Validate email format
+function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Validate URL format
+function validateURL(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// Validate dish input
+function validateDish(name, category, contributor) {
+    const errors = [];
+    
+    if (!name || name.trim().length < 2) {
+        errors.push('Dish name must be at least 2 characters');
+    }
+    if (name.length > 100) {
+        errors.push('Dish name too long (max 100 characters)');
+    }
+    if (!category || !['appetizer', 'main', 'side', 'dessert', 'beverage', 'other'].includes(category)) {
+        errors.push('Invalid category');
+    }
+    if (!contributor || contributor.trim().length < 2) {
+        errors.push('Contributor name must be at least 2 characters');
+    }
+    if (contributor.length > 50) {
+        errors.push('Contributor name too long (max 50 characters)');
+    }
+    
+    return errors;
+}
+
+// Rate limiting helper
+const rateLimiter = {
+    actions: {},
+    check: function(action, limit = 5, windowMs = 60000) {
+        const now = Date.now();
+        if (!this.actions[action]) {
+            this.actions[action] = [];
+        }
+        
+        // Remove old timestamps
+        this.actions[action] = this.actions[action].filter(time => now - time < windowMs);
+        
+        if (this.actions[action].length >= limit) {
+            return false; // Rate limit exceeded
+        }
+        
+        this.actions[action].push(now);
+        return true;
+    }
+};
+
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
 // Firebase Configuration
 // IMPORTANT: Replace this with your own Firebase config
 // Get it from: Firebase Console > Project Settings > Your apps > Web app
@@ -400,12 +481,21 @@ async function searchDishImage(dishName) {
 function handleAddDish(e) {
     e.preventDefault();
     
-    const dishName = dishNameInput.value.trim();
-    const dishCategory = dishCategoryInput.value;
-    const dishNotes = dishNotesInput.value.trim();
+    // Rate limiting - max 5 dishes per minute
+    if (!rateLimiter.check('addDish', 5, 60000)) {
+        showToast('⏱️ Slow down! You can only add 5 dishes per minute', 'error');
+        return;
+    }
     
-    if (!dishName || !dishCategory) {
-        showToast('Please fill in all required fields', 'error');
+    // Get and sanitize inputs
+    const dishName = sanitizeInput(dishNameInput.value);
+    const dishCategory = dishCategoryInput.value;
+    const dishNotes = sanitizeInput(dishNotesInput.value);
+    
+    // Validate inputs
+    const validationErrors = validateDish(dishName, dishCategory, currentUserName);
+    if (validationErrors.length > 0) {
+        showToast('❌ ' + validationErrors[0], 'error');
         return;
     }
     
@@ -427,16 +517,29 @@ function handleAddDish(e) {
     const dishesRef = database.ref(`events/${currentEventCode}/dishes`);
     const newDishRef = dishesRef.push();
     
-    newDishRef.set({
+    // Sanitized data object
+    const dishData = {
         name: dishName,
         category: dishCategory,
         notes: dishNotes,
-        contributor: currentUserName,
+        contributor: sanitizeInput(currentUserName),
         imageUrl: currentDishImage || null,
-        createdAt: firebase.database.ServerValue.TIMESTAMP
-    })
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        // New fields for enhanced features
+        dietaryInfo: {
+            vegetarian: false,
+            vegan: false,
+            glutenFree: false,
+            dairyFree: false,
+            nutFree: false
+        },
+        servings: null,
+        claimed: false
+    };
+    
+    newDishRef.set(dishData)
     .then(() => {
-        showToast('Dish added successfully!', 'success');
+        showToast('✅ Dish added successfully!', 'success');
         addDishForm.reset();
         if (dishImagePreview) {
             dishImagePreview.style.display = 'none';
@@ -445,7 +548,7 @@ function handleAddDish(e) {
     })
     .catch(error => {
         console.error('Error adding dish:', error);
-        showToast('Failed to add dish', 'error');
+        showToast('❌ Failed to add dish. Please try again.', 'error');
     });
 }
 

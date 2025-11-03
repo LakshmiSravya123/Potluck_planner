@@ -37,13 +37,38 @@
       </h2>
       
       <div class="input-group">
-        <label for="new-event-name">Event Name</label>
-        <input type="text" id="new-event-name" placeholder="e.g., Summer BBQ Party" class="input" />
+        <label for="new-event-name">Event Name *</label>
+        <input type="text" id="new-event-name" placeholder="e.g., Summer BBQ Party" class="input" required />
       </div>
 
       <div class="input-group">
-        <label for="new-theme">Choose Theme</label>
-        <select id="new-theme" class="input">
+        <label for="event-date">Date *</label>
+        <input type="date" id="event-date" class="input" required />
+      </div>
+
+      <div class="input-group">
+        <label for="event-time">Time</label>
+        <input type="time" id="event-time" class="input" />
+      </div>
+
+      <div class="input-group">
+        <label for="event-location">Location</label>
+        <input type="text" id="event-location" placeholder="e.g., 123 Main St or Backyard" class="input" />
+      </div>
+
+      <div class="input-group">
+        <label for="host-name">Host Name *</label>
+        <input type="text" id="host-name" placeholder="Your name" class="input" required />
+      </div>
+
+      <div class="input-group">
+        <label for="host-email">Host Email (for notifications)</label>
+        <input type="email" id="host-email" placeholder="your@email.com" class="input" />
+      </div>
+
+      <div class="input-group">
+        <label for="new-theme">Choose Theme *</label>
+        <select id="new-theme" class="input" required>
       <option value="birthday">🎂 Birthday</option>
       <option value="christmas">🎄 Christmas</option>
       <option value="halloween">🎃 Halloween</option>
@@ -155,17 +180,60 @@
         return;
       }
       
-      const name = document.getElementById('new-event-name').value || 'Potluck Party';
+      // Get and validate inputs
+      const name = document.getElementById('new-event-name').value.trim();
+      const eventDate = document.getElementById('event-date').value;
+      const eventTime = document.getElementById('event-time').value;
+      const location = document.getElementById('event-location').value.trim();
+      const hostName = document.getElementById('host-name').value.trim();
+      const hostEmail = document.getElementById('host-email').value.trim();
       const theme = document.getElementById('new-theme').value;
+      
+      // Validation
+      if (!name || name.length < 3) {
+        alert('❌ Please enter an event name (at least 3 characters)');
+        return;
+      }
+      if (!eventDate) {
+        alert('❌ Please select an event date');
+        return;
+      }
+      if (!hostName || hostName.length < 2) {
+        alert('❌ Please enter your name as the host');
+        return;
+      }
+      if (hostEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(hostEmail)) {
+        alert('❌ Please enter a valid email address');
+        return;
+      }
+      
       const id = Date.now().toString(36).toUpperCase();
       const url = `${location.origin}/Potluck_planner/index.html?code=${id}`;
       
-      db.ref(`events/${id.toLowerCase()}`).set({ 
+      // Create comprehensive event object
+      const eventData = {
         createdAt: Date.now(),
-        createdBy: 'Anonymous',
+        name: name,
         theme: theme,
-        name: name
-      }).then(() => {
+        date: eventDate,
+        time: eventTime || null,
+        location: location || null,
+        host: {
+          name: hostName,
+          email: hostEmail || null
+        },
+        settings: {
+          allowDuplicates: false,
+          requireApproval: false,
+          maxDishes: 100
+        },
+        stats: {
+          totalDishes: 0,
+          totalContributors: 0
+        }
+      };
+      
+      db.ref(`events/${id.toLowerCase()}`).set(eventData).then(() => {
         // Show result card
         document.getElementById('result-card').style.display = 'block';
         document.getElementById('share-link').innerHTML = `
