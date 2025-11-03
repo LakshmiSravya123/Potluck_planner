@@ -5,6 +5,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyCzvH64kpIcpgUrjxVsJBhF9SxME7pVCyQ",
   authDomain: "potluck-planner-15a68.firebaseapp.com",
+  databaseURL: "https://potluck-planner-15a68-default-rtdb.firebaseio.com",
   projectId: "potluck-planner-15a68",
   storageBucket: "potluck-planner-15a68.firebasestorage.app",
   messagingSenderId: "209595251975",
@@ -26,14 +27,18 @@ try {
 let currentEventCode = null;
 let currentUserName = null;
 let currentFilter = 'all';
+let currentTheme = 'default';
 let dishesListener = null;
+let themeListener = null;
 
 // DOM Elements
 const eventCodeInput = document.getElementById('eventCode');
+const eventThemeInput = document.getElementById('eventTheme');
 const userNameInput = document.getElementById('userName');
 const joinEventBtn = document.getElementById('joinEventBtn');
 const eventInfo = document.getElementById('eventInfo');
 const currentEventCodeDisplay = document.getElementById('currentEventCode');
+const currentEventThemeDisplay = document.getElementById('currentEventTheme');
 const copyCodeBtn = document.getElementById('copyCodeBtn');
 const addDishSection = document.getElementById('addDishSection');
 const dishesSection = document.getElementById('dishesSection');
@@ -50,13 +55,50 @@ const toast = document.getElementById('toast');
 joinEventBtn.addEventListener('click', handleJoinEvent);
 copyCodeBtn.addEventListener('click', copyEventCode);
 addDishForm.addEventListener('submit', handleAddDish);
+eventThemeInput.addEventListener('change', handleThemePreview);
 filterButtons.forEach(btn => {
     btn.addEventListener('click', () => handleFilterChange(btn.dataset.category));
 });
 
+// Handle Theme Preview
+function handleThemePreview() {
+    const theme = eventThemeInput.value;
+    applyTheme(theme);
+}
+
+// Theme Names
+const themeNames = {
+    'default': '🎉 Default Party',
+    'birthday': '🎂 Birthday',
+    'christmas': '🎄 Christmas',
+    'thanksgiving': '🦃 Thanksgiving',
+    'halloween': '🎃 Halloween',
+    'newyear': '🎆 New Year',
+    'summer': '☀️ Summer BBQ',
+    'spring': '🌸 Spring Garden',
+    'wedding': '💒 Wedding',
+    'graduation': '🎓 Graduation'
+};
+
+// Apply Theme
+function applyTheme(theme) {
+    // Remove all theme classes
+    document.body.className = '';
+    // Add new theme class
+    document.body.classList.add(`theme-${theme}`);
+    currentTheme = theme;
+    // Update theme display if visible
+    if (currentEventThemeDisplay) {
+        currentEventThemeDisplay.textContent = themeNames[theme] || theme;
+    }
+    // Create decorations for the theme
+    createDecorations(theme);
+}
+
 // Handle Join/Create Event
 function handleJoinEvent() {
     const userName = userNameInput.value.trim();
+    const theme = eventThemeInput.value;
     
     if (!userName) {
         showToast('Please enter your name', 'error');
@@ -64,12 +106,13 @@ function handleJoinEvent() {
     }
     
     currentUserName = userName;
+    currentTheme = theme;
     let eventCode = eventCodeInput.value.trim().toUpperCase();
     
     if (!eventCode) {
         // Create new event
         eventCode = generateEventCode();
-        createEvent(eventCode);
+        createEvent(eventCode, theme);
     } else {
         // Join existing event
         joinEvent(eventCode);
@@ -87,17 +130,20 @@ function generateEventCode() {
 }
 
 // Create New Event
-function createEvent(eventCode) {
+function createEvent(eventCode, theme) {
     const eventRef = database.ref(`events/${eventCode}`);
     
     eventRef.set({
         createdAt: firebase.database.ServerValue.TIMESTAMP,
-        createdBy: currentUserName
+        createdBy: currentUserName,
+        theme: theme || 'default'
     })
     .then(() => {
         currentEventCode = eventCode;
+        applyTheme(theme);
         showEventInterface();
         listenToDishes();
+        listenToTheme();
         showToast('Event created successfully!', 'success');
     })
     .catch(error => {
@@ -114,8 +160,14 @@ function joinEvent(eventCode) {
         .then(snapshot => {
             if (snapshot.exists()) {
                 currentEventCode = eventCode;
+                const eventData = snapshot.val();
+                const theme = eventData.theme || 'default';
+                currentTheme = theme;
+                eventThemeInput.value = theme;
+                applyTheme(theme);
                 showEventInterface();
                 listenToDishes();
+                listenToTheme();
                 showToast('Joined event successfully!', 'success');
             } else {
                 showToast('Event not found. Check the code or create a new event.', 'error');
@@ -130,12 +182,14 @@ function joinEvent(eventCode) {
 // Show Event Interface
 function showEventInterface() {
     currentEventCodeDisplay.textContent = currentEventCode;
+    currentEventThemeDisplay.textContent = themeNames[currentTheme] || currentTheme;
     eventInfo.classList.remove('hidden');
     addDishSection.classList.remove('hidden');
     dishesSection.classList.remove('hidden');
     
     // Disable event code input after joining
     eventCodeInput.disabled = true;
+    eventThemeInput.disabled = true;
     userNameInput.disabled = true;
     joinEventBtn.disabled = true;
 }
@@ -181,6 +235,24 @@ function handleAddDish(e) {
     .catch(error => {
         console.error('Error adding dish:', error);
         showToast('Failed to add dish', 'error');
+    });
+}
+
+// Listen to Theme Updates
+function listenToTheme() {
+    if (themeListener) {
+        themeListener.off();
+    }
+    
+    const themeRef = database.ref(`events/${currentEventCode}/theme`);
+    
+    themeListener = themeRef.on('value', snapshot => {
+        const theme = snapshot.val() || 'default';
+        if (theme !== currentTheme) {
+            currentTheme = theme;
+            eventThemeInput.value = theme;
+            applyTheme(theme);
+        }
     });
 }
 
@@ -332,4 +404,206 @@ window.addEventListener('beforeunload', () => {
     if (dishesListener) {
         dishesListener.off();
     }
+    if (themeListener) {
+        themeListener.off();
+    }
 });
+
+// Decorations Management
+const decorationsContainer = document.getElementById('decorations');
+
+function clearDecorations() {
+    decorationsContainer.innerHTML = '';
+}
+
+function createDecorations(theme) {
+    clearDecorations();
+    
+    switch(theme) {
+        case 'birthday':
+            createBirthdayDecorations();
+            break;
+        case 'christmas':
+            createChristmasDecorations();
+            break;
+        case 'halloween':
+            createHalloweenDecorations();
+            break;
+        case 'thanksgiving':
+            createThanksgivingDecorations();
+            break;
+        case 'newyear':
+            createNewYearDecorations();
+            break;
+        case 'wedding':
+            createWeddingDecorations();
+            break;
+        case 'spring':
+            createSpringDecorations();
+            break;
+        case 'summer':
+            createSummerDecorations();
+            break;
+        case 'graduation':
+            createGraduationDecorations();
+            break;
+        case 'default':
+            createDefaultDecorations();
+            break;
+    }
+}
+
+function createBirthdayDecorations() {
+    const balloons = ['🎈', '🎉', '🎊', '🎁', '🎂'];
+    for (let i = 0; i < 15; i++) {
+        const balloon = document.createElement('div');
+        balloon.textContent = balloons[Math.floor(Math.random() * balloons.length)];
+        balloon.style.position = 'absolute';
+        balloon.style.left = Math.random() * 100 + '%';
+        balloon.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+        balloon.style.animation = `floatBalloon ${Math.random() * 4 + 5}s ease-in-out infinite`;
+        balloon.style.animationDelay = Math.random() * 5 + 's';
+        decorationsContainer.appendChild(balloon);
+    }
+}
+
+function createChristmasDecorations() {
+    const snowflakes = ['❄️', '⛄', '🎄', '⭐', '🎅'];
+    for (let i = 0; i < 30; i++) {
+        const snowflake = document.createElement('div');
+        snowflake.className = 'snowflake';
+        snowflake.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+        snowflake.style.left = Math.random() * 100 + '%';
+        snowflake.style.fontSize = (Math.random() * 1 + 1) + 'rem';
+        snowflake.style.animationDuration = (Math.random() * 5 + 8) + 's';
+        snowflake.style.animationDelay = Math.random() * 5 + 's';
+        decorationsContainer.appendChild(snowflake);
+    }
+}
+
+function createHalloweenDecorations() {
+    const items = ['🎃', '👻', '🦇', '🕷️', '🕸️', '💀'];
+    for (let i = 0; i < 20; i++) {
+        const item = document.createElement('div');
+        item.className = 'pumpkin';
+        item.textContent = items[Math.floor(Math.random() * items.length)];
+        item.style.left = Math.random() * 100 + '%';
+        item.style.top = Math.random() * 80 + '%';
+        item.style.animationDelay = Math.random() * 3 + 's';
+        decorationsContainer.appendChild(item);
+    }
+}
+
+function createThanksgivingDecorations() {
+    const leaves = ['🍂', '🍁', '🌾', '🦃', '🌽'];
+    for (let i = 0; i < 25; i++) {
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        leaf.textContent = leaves[Math.floor(Math.random() * leaves.length)];
+        leaf.style.left = Math.random() * 100 + '%';
+        leaf.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+        leaf.style.animationDuration = (Math.random() * 4 + 6) + 's';
+        leaf.style.animationDelay = Math.random() * 5 + 's';
+        decorationsContainer.appendChild(leaf);
+    }
+}
+
+function createNewYearDecorations() {
+    const items = ['✨', '🎆', '🎇', '💫', '⭐'];
+    // Confetti
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        decorationsContainer.appendChild(confetti);
+    }
+    // Sparkles
+    for (let i = 0; i < 30; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.textContent = items[Math.floor(Math.random() * items.length)];
+        sparkle.style.position = 'absolute';
+        sparkle.style.left = Math.random() * 100 + '%';
+        sparkle.style.top = Math.random() * 100 + '%';
+        sparkle.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+        sparkle.style.animation = `sparkleAnimation ${Math.random() * 2 + 1}s ease-in-out infinite`;
+        sparkle.style.animationDelay = Math.random() * 2 + 's';
+        decorationsContainer.appendChild(sparkle);
+    }
+}
+
+function createWeddingDecorations() {
+    const hearts = ['💕', '💖', '💗', '💝', '💞', '💓', '❤️', '🌹'];
+    for (let i = 0; i < 20; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.fontSize = (Math.random() * 1.5 + 1.5) + 'rem';
+        heart.style.animationDuration = (Math.random() * 4 + 6) + 's';
+        heart.style.animationDelay = Math.random() * 5 + 's';
+        decorationsContainer.appendChild(heart);
+    }
+}
+
+function createSpringDecorations() {
+    const flowers = ['🌸', '🌺', '🌼', '🌻', '🌷', '🦋', '🐝'];
+    for (let i = 0; i < 25; i++) {
+        const flower = document.createElement('div');
+        flower.className = 'flower';
+        flower.textContent = flowers[Math.floor(Math.random() * flowers.length)];
+        flower.style.left = Math.random() * 100 + '%';
+        flower.style.top = Math.random() * 80 + '%';
+        flower.style.animationDelay = Math.random() * 4 + 's';
+        decorationsContainer.appendChild(flower);
+    }
+}
+
+function createSummerDecorations() {
+    const items = ['☀️', '🌊', '🏖️', '🍉', '🍹', '🌴', '🐚'];
+    for (let i = 0; i < 15; i++) {
+        const item = document.createElement('div');
+        item.textContent = items[Math.floor(Math.random() * items.length)];
+        item.style.position = 'absolute';
+        item.style.left = Math.random() * 100 + '%';
+        item.style.top = Math.random() * 80 + '%';
+        item.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+        item.style.animation = `flowerGrow ${Math.random() * 3 + 3}s ease-in-out infinite`;
+        item.style.animationDelay = Math.random() * 3 + 's';
+        item.style.opacity = '0.7';
+        decorationsContainer.appendChild(item);
+    }
+}
+
+function createGraduationDecorations() {
+    const items = ['🎓', '📚', '🎉', '⭐', '🏆'];
+    for (let i = 0; i < 20; i++) {
+        const cap = document.createElement('div');
+        cap.className = 'grad-cap';
+        cap.textContent = items[Math.floor(Math.random() * items.length)];
+        cap.style.left = Math.random() * 100 + '%';
+        cap.style.fontSize = (Math.random() * 1.5 + 1.5) + 'rem';
+        cap.style.animationDuration = (Math.random() * 3 + 3) + 's';
+        cap.style.animationDelay = Math.random() * 4 + 's';
+        decorationsContainer.appendChild(cap);
+    }
+}
+
+function createDefaultDecorations() {
+    const items = ['🎉', '🎊', '✨', '🎈'];
+    for (let i = 0; i < 15; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.animationDuration = (Math.random() * 2 + 3) + 's';
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        decorationsContainer.appendChild(confetti);
+    }
+}
+
+// Initialize default theme
+applyTheme('default');
+createDecorations('default');
