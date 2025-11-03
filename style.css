@@ -331,3 +331,37 @@ footer {
   color: rgba(255, 255, 255, 0.8);
   animation: fadeIn 2s ease-out;
 }
+
+/* Dark Mode Toggle Button */
+#dark-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+#dark-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Dark Mode Styles */
+body.dark {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+body.dark img,
+body.dark video,
+body.dark .photo-card img,
+body.dark #ar-viewer {
+  filter: invert(1) hue-rotate(180deg);
+}
