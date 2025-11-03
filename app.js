@@ -233,14 +233,22 @@ function createEvent(eventCode, theme) {
 
 // Join Existing Event
 function joinEvent(eventCode) {
+    console.log('🔍 Attempting to join event:', eventCode);
     const eventRef = database.ref(`events/${eventCode}`);
     
     eventRef.once('value')
         .then(snapshot => {
+            console.log('📊 Firebase response:', {
+                exists: snapshot.exists(),
+                data: snapshot.val()
+            });
+            
             if (snapshot.exists()) {
                 currentEventCode = eventCode;
                 const eventData = snapshot.val();
                 const theme = eventData.theme || 'default';
+                console.log('✅ Event found! Theme:', theme);
+                
                 currentTheme = theme;
                 eventThemeInput.value = theme;
                 applyTheme(theme);
@@ -249,12 +257,13 @@ function joinEvent(eventCode) {
                 listenToTheme();
                 showToast('Joined event successfully!', 'success');
             } else {
+                console.error('❌ Event not found in Firebase:', eventCode);
                 showToast('Event not found. Check the code or create a new event.', 'error');
             }
         })
         .catch(error => {
-            console.error('Error joining event:', error);
-            showToast('Failed to join event', 'error');
+            console.error('🔥 Firebase error:', error);
+            showToast('Failed to join event: ' + error.message, 'error');
         });
 }
 
