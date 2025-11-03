@@ -1,4 +1,4 @@
-const CACHE = 'potluck-v4';
+const CACHE = 'potluck-v20251103221322';
 const FILES = [
   '/Potluck_planner/',
   '/Potluck_planner/index.html',
