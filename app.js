@@ -240,6 +240,12 @@ function showEventInterface() {
     
     // Initialize photo gallery
     initializePhotoGallery();
+    
+    // Attach viral share and export listeners
+    document.getElementById('shareWhatsAppBtn')?.addEventListener('click', shareOnWhatsApp);
+    document.getElementById('shareTwitterBtn')?.addEventListener('click', shareOnTwitter);
+    document.getElementById('exportMenuBtn')?.addEventListener('click', exportMenu);
+    document.getElementById('voiceInputBtn')?.addEventListener('click', voiceInputDish);
 }
 
 // Copy Event Code
@@ -1075,6 +1081,125 @@ function deletePhoto(photoId) {
             console.error('Error deleting photo:', error);
             showToast('Failed to delete photo', 'error');
         });
+}
+
+// Voice Input for Dish Name
+function voiceInputDish() {
+    const voiceBtn = document.getElementById('voiceInputBtn');
+    const dishNameInput = document.getElementById('dishName');
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        showToast('Voice input not supported in this browser', 'error');
+        return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    voiceBtn.innerHTML = '🎤 Listening...';
+    voiceBtn.disabled = true;
+    
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        dishNameInput.value = transcript;
+        showToast(`Heard: "${transcript}"`, 'success');
+        // Trigger AI image search
+        dishNameInput.dispatchEvent(new Event('input'));
+    };
+    
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        showToast('Voice input failed. Please try again.', 'error');
+    };
+    
+    recognition.onend = () => {
+        voiceBtn.innerHTML = '🎤 Voice';
+        voiceBtn.disabled = false;
+    };
+    
+    recognition.start();
+}
+
+// Share on WhatsApp
+function shareOnWhatsApp() {
+    const eventUrl = window.location.href;
+    const eventTitle = document.getElementById('eventTitle')?.textContent || 'Potluck Event';
+    const dishCount = allDishes.length;
+    
+    const message = `🍽️ Join my ${eventTitle}!\n\n${dishCount} dishes already signed up!\n\nAdd yours here: ${eventUrl}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    
+    window.open(whatsappUrl, '_blank');
+    showToast('Opening WhatsApp...', 'success');
+}
+
+// Share on Twitter/X
+function shareOnTwitter() {
+    const eventUrl = window.location.href;
+    const eventTitle = document.getElementById('eventTitle')?.textContent || 'Potluck Event';
+    
+    const message = `🍽️ Join my ${eventTitle}! Bring a dish and let's feast together! 🎉`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}&url=${encodeURIComponent(eventUrl)}`;
+    
+    window.open(twitterUrl, '_blank');
+    showToast('Opening X (Twitter)...', 'success');
+}
+
+// Export Menu as Text File
+function exportMenu() {
+    if (allDishes.length === 0) {
+        showToast('No dishes to export yet!', 'error');
+        return;
+    }
+    
+    const eventTitle = document.getElementById('eventTitle')?.textContent || 'Potluck Event';
+    let menuText = `🍽️ ${eventTitle.toUpperCase()}\n`;
+    menuText += `${'='.repeat(50)}\n\n`;
+    
+    // Group by category
+    const categories = {
+        'appetizer': '🥗 APPETIZERS',
+        'main': '🍖 MAIN COURSES',
+        'side': '🥔 SIDE DISHES',
+        'dessert': '🍰 DESSERTS',
+        'beverage': '🥤 BEVERAGES',
+        'other': '🍴 OTHER'
+    };
+    
+    Object.entries(categories).forEach(([key, title]) => {
+        const categoryDishes = allDishes.filter(d => d.category === key);
+        if (categoryDishes.length > 0) {
+            menuText += `${title}\n${'-'.repeat(50)}\n`;
+            categoryDishes.forEach(dish => {
+                menuText += `• ${dish.name}`;
+                if (dish.notes) menuText += ` (${dish.notes})`;
+                menuText += ` - by ${dish.contributor}\n`;
+            });
+            menuText += '\n';
+        }
+    });
+    
+    menuText += `\n${'='.repeat(50)}\n`;
+    menuText += `Total Dishes: ${allDishes.length}\n`;
+    menuText += `Contributors: ${new Set(allDishes.map(d => d.contributor)).size}\n`;
+    menuText += `\nGenerated from: ${window.location.href}\n`;
+    
+    // Create and download file
+    const blob = new Blob([menuText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentEventCode}-menu.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('Menu exported! 📄', 'success');
 }
 
 // Cleanup on page unload

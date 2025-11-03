@@ -137,6 +137,19 @@
                         ✉️ Send Email Reminder
                     </button>
                 </div>
+                
+                <!-- Viral Share & Export Buttons -->
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <button id="shareWhatsAppBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #25D366, #128C7E); color: white;">
+                        📱 Share on WhatsApp
+                    </button>
+                    <button id="shareTwitterBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #1DA1F2, #0d8bd9); color: white;">
+                        🐦 Share on X
+                    </button>
+                    <button id="exportMenuBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white;">
+                        📄 Export Menu
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -167,8 +180,13 @@
                 <div class="form-row">
                     <div class="input-group">
                         <label for="dishName">Dish Name ✨ AI-powered</label>
-                        <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required>
-                        <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">Type a dish name to see AI-generated image preview</small>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required style="flex: 1;">
+                            <button type="button" id="voiceInputBtn" class="btn" style="padding: 0.75rem 1rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; white-space: nowrap;">
+                                🎤 Voice
+                            </button>
+                        </div>
+                        <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">Type or speak a dish name to see AI-generated image preview</small>
                     </div>
                     <div class="input-group">
                         <label for="dishCategory">Category</label>
