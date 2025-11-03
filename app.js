@@ -157,16 +157,22 @@ function closeAR() {
   document.getElementById('ar-viewer').src = '';
 }
 
-// Photo Upload & Gallery
+// Photo Upload & Gallery (using base64 to avoid CORS)
 function uploadPhoto() {
   const file = document.getElementById('photo').files[0];
   if (!file) return alert('Select a photo!');
-  const ref = storage.ref(`potlucks/${eventId}/photos/${Date.now()}`);
-  ref.put(file).then(snap => {
-    snap.ref.getDownloadURL().then(url => {
-      potluckRef.child('photos').push({ url, name: document.getElementById('name').value || 'Guest' });
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    potluckRef.child('photos').push({ 
+      url: dataUrl, 
+      name: document.getElementById('name').value || 'Guest',
+      timestamp: Date.now()
     });
-  });
+    alert('Photo uploaded! 📸');
+  };
+  reader.readAsDataURL(file);
 }
 
 potluckRef.child('photos').on('value', snap => {
@@ -357,4 +363,3 @@ if ('serviceWorker' in navigator) {
 
 // Init on Load
 checkMissing();
-generateQR(); // Auto QR
