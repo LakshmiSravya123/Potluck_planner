@@ -76,23 +76,27 @@ function checkUrlParameters() {
         const urlParams = new URLSearchParams(window.location.search);
         const codeFromUrl = urlParams.get('code');
         
+        // Get elements fresh each time to ensure they exist
+        const codeInput = document.getElementById('eventCode');
+        const nameInput = document.getElementById('userName');
+        
         console.log('🔍 URL Check:', { 
             url: window.location.href,
             codeFromUrl, 
-            hasInput: !!eventCodeInput,
-            inputValue: eventCodeInput?.value 
+            hasInput: !!codeInput,
+            inputValue: codeInput?.value 
         });
         
         if (codeFromUrl) {
             const codeUpper = codeFromUrl.toUpperCase();
             
-            if (eventCodeInput) {
-                eventCodeInput.value = codeUpper;
+            if (codeInput) {
+                codeInput.value = codeUpper;
                 console.log('✅ Event code auto-filled:', codeUpper);
                 
                 // Focus on name input
-                if (userNameInput) {
-                    userNameInput.focus();
+                if (nameInput) {
+                    nameInput.focus();
                 }
                 
                 // Show toast notification
@@ -104,7 +108,7 @@ function checkUrlParameters() {
                     }
                 }, 1000);
             } else {
-                console.error('❌ Event code input not found!');
+                console.error('❌ Event code input not found! DOM not ready yet.');
             }
         } else {
             console.log('ℹ️ No code parameter in URL');
