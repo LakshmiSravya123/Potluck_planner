@@ -6,13 +6,13 @@
 }
 
 :root {
-    --primary: #6366f1;
-    --primary-dark: #4f46e5;
-    --primary-light: #818cf8;
-    --secondary: #ec4899;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
+    --primary: #e91e63;
+    --primary-dark: #c2185b;
+    --primary-light: #f06292;
+    --secondary: #9c27b0;
+    --success: #4CAF50;
+    --warning: #ff9800;
+    --danger: #f44336;
     --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
     --gray-200: #e5e7eb;
@@ -39,11 +39,17 @@ body {
     animation: gradientShift 15s ease infinite;
     background-attachment: fixed;
     min-height: 100vh;
-    padding: 3rem 1.5rem;
+    padding: 2rem 1rem;
     color: var(--gray-900);
     line-height: 1.6;
     position: relative;
     overflow-x: hidden;
+}
+
+@media (min-width: 768px) {
+    body {
+        padding: 3rem 1.5rem;
+    }
 }
 
 /* Theme Background Images */
@@ -180,8 +186,20 @@ body.theme-graduation {
 .container {
     position: relative;
     z-index: 2;
-    max-width: 1400px;
+    max-width: 800px;
     margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
 }
 
 /* Balloons for Birthday */
@@ -1126,4 +1144,111 @@ body.theme-birthday .decorations::after {
         font-size: 0.75rem;
         padding: 0.4rem 0.8rem;
     }
+}
+
+/* Enhanced Visual Styles */
+h1, h2, h3 {
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+h2 {
+    font-size: 1.75rem;
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 0.5rem;
+    margin-top: 2rem;
+}
+
+h3 {
+    font-size: 1.25rem;
+}
+
+/* Better Button Styles */
+.btn, button {
+    transition: all 0.3s ease;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+.btn:hover, button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.btn:active, button:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success), #45a049);
+    color: white;
+}
+
+/* Card Enhancements */
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    transform: translateY(-4px);
+}
+
+/* Input Enhancements */
+input, select, textarea {
+    border: 2px solid var(--gray-300);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loading {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Success Animation */
+@keyframes successPop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.success-animation {
+    animation: successPop 0.5s ease-out;
 }
