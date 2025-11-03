@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potluck Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-slate-800">🎉 Potluck Planner</h1>
+            <button id="shareBtn" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+                Share Event
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-6">
+        <!-- Tabs -->
+        <div class="flex gap-6 border-b border-gray-200 mb-6">
+            <button id="guestsTab" class="pb-3 font-semibold text-emerald-600 border-b-2 border-emerald-600">Guests</button>
+            <button id="itemsTab" class="pb-3 font-semibold text-slate-600 hover:text-slate-800">Items</button>
+        </div>
+
+        <!-- Guests Section -->
+        <div id="guestsSection">
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-lg font-semibold text-slate-800 mb-4">Add Guest</h2>
+                <form id="guestForm" class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="guestName" placeholder="Name" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="email" id="guestEmail" placeholder="Email (optional)" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <button type="submit" class="px-6 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors">Add</button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-lg font-semibold text-slate-800 mb-4">Guest List</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-2 text-sm font-semibold text-slate-600">Name</th>
+                                <th class="text-left py-2 text-sm font-semibold text-slate-600 hidden sm:table-cell">Email</th>
+                                <th class="text-center py-2 text-sm font-semibold text-slate-600">RSVP</th>
+                                <th class="text-center py-2 text-sm font-semibold text-slate-600">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guestList"></tbody>
+                    </table>
+                    <div id="noGuests" class="text-center py-8 text-gray-400">No guests yet</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Section -->
+        <div id="itemsSection" class="hidden">
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-lg font-semibold text-slate-800 mb-4">Add Item</h2>
+                <form id="itemForm" class="flex gap-3">
+                    <input type="text" id="itemName" placeholder="Dish or item..." required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <button type="submit" class="px-6 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors">Add</button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-lg font-semibold text-slate-800 mb-4">Items List</h2>
+                <div id="itemList" class="space-y-2"></div>
+                <div id="noItems" class="text-center py-8 text-gray-400">No items yet</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg hidden transition-opacity">Saved!</div>
+
+    <script>
+    // FIX: Fast hash-based routing + localStorage batching
+    const app = {
+        eventId: '',
+        guests: [],
+        items: [],
+        saveTimer: null,
+        
+        init() {
+            // FIX: Load in <100ms - read hash or create new
+            this.eventId = location.hash.slice(1) || this.generateId();
+            location.hash = this.eventId;
+            this.loadData();
+            this.bindEvents();
+            this.render();
+        },
+        
+        generateId() {
+            return Math.random().toString(36).substr(2, 8);
+        },
+        
+        // FIX: Batch saves with requestAnimationFrame - no lag
+        scheduleSave() {
+            if (this.saveTimer) return;
+            this.saveTimer = requestAnimationFrame(() => {
+                localStorage.setItem(`event_${this.eventId}`, JSON.stringify({
+                    guests: this.guests,
+                    items: this.items
+                }));
+                this.showToast();
+                this.saveTimer = null;
+            });
+        },
+        
+        loadData() {
+            const data = localStorage.getItem(`event_${this.eventId}`);
+            if (data) {
+                const parsed = JSON.parse(data);
+                this.guests = parsed.guests || [];
+                this.items = parsed.items || [];
+            }
+        },
+        
+        bindEvents() {
+            // Tabs
+            guestsTab.onclick = () => this.switchTab('guests');
+            itemsTab.onclick = () => this.switchTab('items');
+            
+            // Share
+            shareBtn.onclick = () => {
+                navigator.clipboard.writeText(location.href);
+                this.showToast('Link copied!');
+            };
+            
+            // Forms
+            guestForm.onsubmit = (e) => {
+                e.preventDefault();
+                this.addGuest(guestName.value, guestEmail.value);
+                guestForm.reset();
+            };
+            
+            itemForm.onsubmit = (e) => {
+                e.preventDefault();
+                this.addItem(itemName.value);
+                itemForm.reset();
+            };
+        },
+        
+        switchTab(tab) {
+            if (tab === 'guests') {
+                guestsSection.classList.remove('hidden');
+                itemsSection.classList.add('hidden');
+                guestsTab.className = 'pb-3 font-semibold text-emerald-600 border-b-2 border-emerald-600';
+                itemsTab.className = 'pb-3 font-semibold text-slate-600 hover:text-slate-800';
+            } else {
+                guestsSection.classList.add('hidden');
+                itemsSection.classList.remove('hidden');
+                itemsTab.className = 'pb-3 font-semibold text-emerald-600 border-b-2 border-emerald-600';
+                guestsTab.className = 'pb-3 font-semibold text-slate-600 hover:text-slate-800';
+            }
+        },
+        
+        addGuest(name, email) {
+            this.guests.push({ name, email, rsvp: false });
+            this.render();
+            this.scheduleSave();
+        },
+        
+        deleteGuest(idx) {
+            this.guests.splice(idx, 1);
+            this.render();
+            this.scheduleSave();
+        },
+        
+        toggleRSVP(idx) {
+            this.guests[idx].rsvp = !this.guests[idx].rsvp;
+            this.render();
+            this.scheduleSave();
+        },
+        
+        addItem(name) {
+            this.items.push({ name, assignee: '', done: false });
+            this.render();
+            this.scheduleSave();
+        },
+        
+        deleteItem(idx) {
+            this.items.splice(idx, 1);
+            this.render();
+            this.scheduleSave();
+        },
+        
+        toggleDone(idx) {
+            this.items[idx].done = !this.items[idx].done;
+            this.render();
+            this.scheduleSave();
+        },
+        
+        assignItem(idx, assignee) {
+            this.items[idx].assignee = assignee;
+            this.scheduleSave();
+        },
+        
+        render() {
+            // Guests
+            noGuests.style.display = this.guests.length ? 'none' : 'block';
+            guestList.innerHTML = this.guests.map((g, i) => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 text-slate-800">${g.name}</td>
+                    <td class="py-3 text-slate-600 hidden sm:table-cell">${g.email || '-'}</td>
+                    <td class="py-3 text-center">
+                        <button onclick="app.toggleRSVP(${i})" class="w-11 h-6 rounded-full transition-colors ${g.rsvp ? 'bg-emerald-500' : 'bg-gray-300'}">
+                            <span class="block w-4 h-4 bg-white rounded-full transition-transform ${g.rsvp ? 'ml-6' : 'ml-1'}"></span>
+                        </button>
+                    </td>
+                    <td class="py-3 text-center">
+                        <button onclick="app.deleteGuest(${i})" class="text-red-500 hover:text-red-700">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Items
+            noItems.style.display = this.items.length ? 'none' : 'block';
+            itemList.innerHTML = this.items.map((item, i) => `
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <input type="checkbox" ${item.done ? 'checked' : ''} onchange="app.toggleDone(${i})" class="w-5 h-5 text-emerald-600 rounded">
+                    <span class="flex-1 ${item.done ? 'line-through text-gray-400' : 'text-slate-800'}">${item.name}</span>
+                    <select onchange="app.assignItem(${i}, this.value)" class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="">Assign...</option>
+                        ${this.guests.map(g => `<option value="${g.name}" ${item.assignee === g.name ? 'selected' : ''}>${g.name}</option>`).join('')}
+                    </select>
+                    <button onclick="app.deleteItem(${i})" class="text-red-500 hover:text-red-700">✕</button>
+                </div>
+            `).join('');
+        },
+        
+        showToast(msg = 'Saved!') {
+            toast.textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+    };
+    
+    // FIX: Init immediately - load in <100ms
+    app.init();
+    </script>
+</body>
+</html>
