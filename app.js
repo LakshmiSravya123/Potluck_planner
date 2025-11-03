@@ -23,9 +23,8 @@ try {
     showToast("Please configure Firebase in app.js", "error");
 }
 
-// Imgur Configuration (Free - No Account Needed!)
-// Anonymous uploads - works instantly, no API key required
-const IMGUR_CLIENT_ID = 'c898c0bb848ca39'; // Public anonymous upload client
+// Photo Storage: Using base64 data URLs stored directly in Firebase
+// No external service needed - unlimited, instant, free forever!
 
 // App State
 let currentEventCode = null;
@@ -942,7 +941,7 @@ function initializePhotoGallery() {
     listenToPhotos();
 }
 
-// Upload Photo with Imgur
+// Upload Photo - Store as base64 in Firebase
 function uploadPhoto() {
     const fileInput = document.getElementById('photoInput');
     fileInput.click();
@@ -957,48 +956,32 @@ function uploadPhoto() {
             return;
         }
         
-        if (file.size > 10 * 1024 * 1024) {
-            showToast('Image must be less than 10MB', 'error');
+        // Limit to 2MB for Firebase performance
+        if (file.size > 2 * 1024 * 1024) {
+            showToast('Image must be less than 2MB', 'error');
             return;
         }
         
         // Show uploading state
         uploadPhotoBtn.disabled = true;
-        uploadPhotoBtn.innerHTML = '⏳ Uploading...';
+        uploadPhotoBtn.innerHTML = '⏳ Processing...';
         
         try {
-            // Convert to base64
+            // Convert to base64 data URL
             const reader = new FileReader();
             reader.readAsDataURL(file);
             
             reader.onload = async () => {
-                const base64Image = reader.result.split(',')[1];
-                
-                // Upload to Imgur (anonymous)
-                const formData = new FormData();
-                formData.append('image', base64Image);
-                formData.append('type', 'base64');
-                
-                const response = await fetch('https://api.imgur.com/3/image', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Client-ID ${IMGUR_CLIENT_ID}`
-                    },
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    const imageUrl = data.data.link;
+                try {
+                    const dataUrl = reader.result;
                     
                     // Find user's dish name
                     const userDish = allDishes.find(d => d.contributor === currentUserName);
                     const dishName = userDish ? userDish.name : 'My Dish';
                     
-                    // Save to database
+                    // Save to Firebase (base64 data URL stored directly)
                     await database.ref(`events/${currentEventCode}/photos`).push({
-                        url: imageUrl,
+                        url: dataUrl, // Store base64 data URL
                         contributor: currentUserName,
                         dishName: dishName,
                         uploadedAt: firebase.database.ServerValue.TIMESTAMP
@@ -1006,13 +989,15 @@ function uploadPhoto() {
                     
                     showToast('Photo uploaded successfully! 📸', 'success');
                     fileInput.value = '';
-                } else {
-                    throw new Error(data.data?.error || 'Upload failed');
+                    
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    showToast('Failed to save photo. Please try again.', 'error');
                 }
             };
             
             reader.onerror = () => {
-                throw new Error('Failed to read file');
+                showToast('Failed to read file', 'error');
             };
             
         } catch (error) {
