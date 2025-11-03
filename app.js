@@ -55,7 +55,17 @@ const toast = document.getElementById('toast');
 const dishImagePreview = document.getElementById('dishImagePreview');
 let aiSuggestionsBtn = null;
 let viewMenuCardBtn = null;
+let generateQRBtn = null;
+let sendReminderBtn = null;
 let allDishes = [];
+
+// Initialize EmailJS (Free tier - sign up at https://www.emailjs.com/)
+// Replace with your own keys after signing up
+(function() {
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
+    }
+})();
 
 // Event Listeners
 joinEventBtn.addEventListener('click', handleJoinEvent);
@@ -210,6 +220,18 @@ function showEventInterface() {
     viewMenuCardBtn = document.getElementById('viewMenuCardBtn');
     if (viewMenuCardBtn) {
         viewMenuCardBtn.addEventListener('click', showMenuCard);
+    }
+    
+    // Attach QR code button listener
+    generateQRBtn = document.getElementById('generateQRBtn');
+    if (generateQRBtn) {
+        generateQRBtn.addEventListener('click', generateQRCode);
+    }
+    
+    // Attach email reminder button listener
+    sendReminderBtn = document.getElementById('sendReminderBtn');
+    if (sendReminderBtn) {
+        sendReminderBtn.addEventListener('click', sendEmailReminder);
     }
 }
 
@@ -710,6 +732,148 @@ function getThemeSuggestions(theme) {
     };
     
     return suggestions[theme] || suggestions['default'];
+}
+
+// Generate QR Code for Event
+function generateQRCode() {
+    const eventUrl = `${window.location.origin}${window.location.pathname}?code=${currentEventCode}`;
+    
+    const modalHTML = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(5px);" onclick="this.remove()">
+            <div style="background: white; border-radius: 1.5rem; padding: 2.5rem; max-width: 500px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.3); text-align: center;" onclick="event.stopPropagation()">
+                <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--gray-900); margin: 0 0 1rem 0;">📱 Scan to Join Event</h2>
+                <p style="color: var(--gray-600); margin-bottom: 1.5rem;">Share this QR code with guests!</p>
+                
+                <div id="qrcode" style="display: flex; justify-content: center; margin: 2rem 0; padding: 1.5rem; background: white; border-radius: 1rem;"></div>
+                
+                <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;">
+                    <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0 0 0.5rem 0;">Event Code:</p>
+                    <p style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin: 0; font-family: monospace;">${currentEventCode}</p>
+                </div>
+                
+                <div style="display: flex; gap: 0.75rem;">
+                    <button onclick="this.closest('div[style*=fixed]').remove()" 
+                            style="flex: 1; padding: 0.75rem; background: var(--gray-200); border: none; border-radius: 0.75rem; font-weight: 600; cursor: pointer;">
+                        Close
+                    </button>
+                    <button onclick="window.print()" 
+                            style="flex: 1; padding: 0.75rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 0.75rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                        🖨️ Print QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Generate QR code
+    setTimeout(() => {
+        const qrContainer = document.getElementById('qrcode');
+        if (qrContainer && typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+                text: eventUrl,
+                width: 256,
+                height: 256,
+                colorDark: '#6366f1',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+    }, 100);
+    
+    showToast('QR Code generated! 📱', 'success');
+}
+
+// Send Email Reminder
+function sendEmailReminder() {
+    const email = prompt('Enter email address to send reminder:');
+    if (!email || !email.includes('@')) {
+        if (email !== null) showToast('Please enter a valid email', 'error');
+        return;
+    }
+    
+    // Check if EmailJS is configured
+    if (typeof emailjs === 'undefined' || !emailjs) {
+        showToast('⚠️ EmailJS not configured. See setup instructions!', 'error');
+        showEmailJSSetup();
+        return;
+    }
+    
+    const eventUrl = `${window.location.origin}${window.location.pathname}?code=${currentEventCode}`;
+    const themeName = themeNames[currentTheme] || currentTheme;
+    
+    // EmailJS template parameters
+    const templateParams = {
+        to_email: email,
+        event_code: currentEventCode,
+        event_theme: themeName,
+        event_url: eventUrl,
+        dish_count: allDishes.length,
+        from_name: currentUserName
+    };
+    
+    // Send email using EmailJS
+    // You need to replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with your own
+    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+        .then(() => {
+            showToast(`✉️ Reminder sent to ${email}!`, 'success');
+        })
+        .catch((error) => {
+            console.error('EmailJS error:', error);
+            showToast('Failed to send email. Check EmailJS setup.', 'error');
+            showEmailJSSetup();
+        });
+}
+
+// Show EmailJS Setup Instructions
+function showEmailJSSetup() {
+    const setupHTML = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(5px);" onclick="this.remove()">
+            <div style="background: white; border-radius: 1.5rem; padding: 2.5rem; max-width: 600px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--gray-900); margin: 0 0 1rem 0;">📧 EmailJS Setup (Free!)</h2>
+                
+                <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1)); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0 0 1rem 0; font-size: 1.125rem;">Quick Setup (5 minutes):</h3>
+                    <ol style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+                        <li>Go to <a href="https://www.emailjs.com/" target="_blank" style="color: var(--primary); font-weight: 600;">emailjs.com</a></li>
+                        <li>Sign up for FREE (200 emails/month)</li>
+                        <li>Create an Email Service (Gmail, Outlook, etc.)</li>
+                        <li>Create an Email Template with these variables:
+                            <ul style="margin-top: 0.5rem;">
+                                <li><code>{{to_email}}</code></li>
+                                <li><code>{{event_code}}</code></li>
+                                <li><code>{{event_theme}}</code></li>
+                                <li><code>{{event_url}}</code></li>
+                                <li><code>{{dish_count}}</code></li>
+                                <li><code>{{from_name}}</code></li>
+                            </ul>
+                        </li>
+                        <li>Copy your Public Key, Service ID, and Template ID</li>
+                        <li>Update <code>app.js</code> lines 66, 725, 726</li>
+                    </ol>
+                </div>
+                
+                <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;">
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--gray-700);">
+                        <strong>Sample Email Template:</strong><br>
+                        Subject: You're invited to {{event_theme}}!<br><br>
+                        Hi! {{from_name}} invited you to join their potluck event.<br>
+                        Event Code: {{event_code}}<br>
+                        Current dishes: {{dish_count}}<br>
+                        Join here: {{event_url}}
+                    </p>
+                </div>
+                
+                <button onclick="this.closest('div[style*=fixed]').remove()" 
+                        style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 0.75rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', setupHTML);
 }
 
 // Escape HTML to prevent XSS

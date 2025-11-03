@@ -107,6 +107,26 @@
                     </div>
                 </div>
                 <p class="share-text">Share this code with others to let them join!</p>
+                
+                <!-- Share Options -->
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <button id="generateQRBtn" class="btn" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="5" height="5"></rect>
+                            <rect x="16" y="3" width="5" height="5"></rect>
+                            <rect x="3" y="16" width="5" height="5"></rect>
+                            <path d="M21 16h-3a2 2 0 0 0-2 2v3"></path>
+                        </svg>
+                        📱 Generate QR Code
+                    </button>
+                    <button id="sendReminderBtn" class="btn" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        ✉️ Send Email Reminder
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -234,8 +254,14 @@
     <div id="toast" class="toast hidden"></div>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <!-- App Script -->
     <script src="app.js"></script>
