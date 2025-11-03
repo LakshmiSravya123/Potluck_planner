@@ -14,15 +14,19 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app, database, storage;
+let app, database;
 try {
     app = firebase.initializeApp(firebaseConfig);
     database = firebase.database();
-    storage = firebase.storage();
 } catch (error) {
     console.error("Firebase initialization error:", error);
     showToast("Please configure Firebase in app.js", "error");
 }
+
+// Cloudinary Configuration (Free - No Account Needed!)
+// Using demo cloud name - works instantly, no signup required
+const CLOUDINARY_CLOUD_NAME = 'demo';
+const CLOUDINARY_UPLOAD_PRESET = 'docs_upload_example_us_preset';
 
 // App State
 let currentEventCode = null;
@@ -920,79 +924,72 @@ function initializePhotoGallery() {
     listenToPhotos();
 }
 
-// Upload Photo
+// Upload Photo with Cloudinary
 function uploadPhoto() {
-    const fileInput = document.getElementById('photoInput');
-    const file = fileInput.files[0];
-    
-    if (!file) {
-        showToast('Please select a photo first', 'error');
-        return;
-    }
-    
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-        showToast('Please select an image file', 'error');
-        return;
-    }
-    
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('Image must be less than 5MB', 'error');
-        return;
-    }
-    
-    // Show uploading state
-    uploadPhotoBtn.disabled = true;
-    uploadPhotoBtn.innerHTML = '⏳ Uploading...';
-    
-    // Create storage reference
-    const timestamp = Date.now();
-    const storageRef = storage.ref(`events/${currentEventCode}/photos/${timestamp}_${file.name}`);
-    
-    // Upload file
-    const uploadTask = storageRef.put(file);
-    
-    uploadTask.on('state_changed',
-        (snapshot) => {
-            // Progress
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            uploadPhotoBtn.innerHTML = `⏳ ${Math.round(progress)}%`;
-        },
-        (error) => {
-            // Error
+    // Create Cloudinary upload widget
+    const widget = cloudinary.createUploadWidget({
+        cloudName: CLOUDINARY_CLOUD_NAME,
+        uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+        sources: ['local', 'camera'],
+        multiple: false,
+        maxFileSize: 5000000, // 5MB
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        maxImageWidth: 2000,
+        maxImageHeight: 2000,
+        cropping: true,
+        croppingAspectRatio: 1,
+        showSkipCropButton: true,
+        styles: {
+            palette: {
+                window: "#FFFFFF",
+                windowBorder: "#6366f1",
+                tabIcon: "#6366f1",
+                menuIcons: "#6366f1",
+                textDark: "#1f2937",
+                textLight: "#FFFFFF",
+                link: "#6366f1",
+                action: "#6366f1",
+                inactiveTabIcon: "#9ca3af",
+                error: "#ef4444",
+                inProgress: "#6366f1",
+                complete: "#10b981",
+                sourceBg: "#f9fafb"
+            }
+        }
+    }, (error, result) => {
+        if (error) {
             console.error('Upload error:', error);
-            showToast('Failed to upload photo. Make sure Firebase Storage is enabled!', 'error');
-            uploadPhotoBtn.disabled = false;
-            uploadPhotoBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg> Upload Photo';
-        },
-        () => {
-            // Success - get download URL
-            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                // Find user's dish name
-                const userDish = allDishes.find(d => d.contributor === currentUserName);
-                const dishName = userDish ? userDish.name : 'My Dish';
-                
-                // Save photo metadata to database
-                database.ref(`events/${currentEventCode}/photos`).push({
-                    url: downloadURL,
-                    contributor: currentUserName,
-                    dishName: dishName,
-                    uploadedAt: firebase.database.ServerValue.TIMESTAMP
-                })
-                .then(() => {
-                    showToast('Photo uploaded successfully! 📸', 'success');
-                    fileInput.value = '';
-                    uploadPhotoBtn.disabled = false;
-                    uploadPhotoBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg> Upload Photo';
-                })
-                .catch(error => {
-                    console.error('Database error:', error);
-                    showToast('Failed to save photo metadata', 'error');
-                });
+            showToast('Failed to upload photo', 'error');
+            return;
+        }
+        
+        if (result.event === 'success') {
+            const imageUrl = result.info.secure_url;
+            
+            // Find user's dish name
+            const userDish = allDishes.find(d => d.contributor === currentUserName);
+            const dishName = userDish ? userDish.name : 'My Dish';
+            
+            // Save photo metadata to database
+            database.ref(`events/${currentEventCode}/photos`).push({
+                url: imageUrl,
+                contributor: currentUserName,
+                dishName: dishName,
+                uploadedAt: firebase.database.ServerValue.TIMESTAMP
+            })
+            .then(() => {
+                showToast('Photo uploaded successfully! 📸', 'success');
+                widget.close();
+            })
+            .catch(error => {
+                console.error('Database error:', error);
+                showToast('Failed to save photo', 'error');
             });
         }
-    );
+    });
+    
+    // Open the widget
+    widget.open();
 }
 
 // Listen to Photos
@@ -1043,7 +1040,7 @@ function renderPhotos(photos) {
                         👤 ${escapeHtml(photo.contributor)}
                     </div>
                     ${isOwner ? `
-                        <button class="photo-delete-btn" onclick="deletePhoto('${photo.id}', '${photo.url}')">
+                        <button class="photo-delete-btn" onclick="deletePhoto('${photo.id}')">
                             🗑️ Delete Photo
                         </button>
                     ` : ''}
@@ -1054,18 +1051,13 @@ function renderPhotos(photos) {
 }
 
 // Delete Photo
-function deletePhoto(photoId, photoUrl) {
+function deletePhoto(photoId) {
     if (!confirm('Are you sure you want to delete this photo?')) {
         return;
     }
     
-    // Delete from storage
-    const storageRef = storage.refFromURL(photoUrl);
-    storageRef.delete()
-        .then(() => {
-            // Delete from database
-            return database.ref(`events/${currentEventCode}/photos/${photoId}`).remove();
-        })
+    // Delete from database (Cloudinary URL stays active but won't show in gallery)
+    database.ref(`events/${currentEventCode}/photos/${photoId}`).remove()
         .then(() => {
             showToast('Photo deleted successfully', 'success');
         })
