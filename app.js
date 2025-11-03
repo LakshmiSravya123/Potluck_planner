@@ -364,10 +364,49 @@ function joinEvent(eventCode) {
         });
 }
 
+// Check if event should be auto-deleted (2 days after event date)
+function checkEventExpiration(eventData) {
+    if (!eventData.date) return false; // No date set, don't delete
+    
+    const eventDate = new Date(eventData.date);
+    const now = new Date();
+    const twoDaysAfterEvent = new Date(eventDate);
+    twoDaysAfterEvent.setDate(twoDaysAfterEvent.getDate() + 2);
+    
+    // If current time is more than 2 days after event
+    if (now > twoDaysAfterEvent) {
+        console.log('🗑️ Event expired (2 days past event date). Deleting...');
+        
+        // Delete the event
+        database.ref(`events/${currentEventCode}`).remove()
+            .then(() => {
+                console.log('✅ Expired event deleted successfully');
+                showToast('⚠️ This event has expired and been archived (2 days past event date)', 'error');
+                
+                // Redirect to home after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
+            })
+            .catch(error => {
+                console.error('Error deleting expired event:', error);
+            });
+        
+        return true; // Event is expired
+    }
+    
+    return false; // Event is still valid
+}
+
 // Populate Event Metadata
 function populateEventMetadata(eventData) {
     const eventDetailsCard = document.getElementById('eventDetailsCard');
     if (!eventDetailsCard) return;
+    
+    // Check if event has expired (2 days after event date)
+    if (checkEventExpiration(eventData)) {
+        return; // Don't show event details if expired
+    }
     
     // Show the card
     eventDetailsCard.classList.remove('hidden');
@@ -378,18 +417,31 @@ function populateEventMetadata(eventData) {
         eventNameEl.textContent = eventData.name;
     }
     
-    // Date
+    // Date with expiration warning
     if (eventData.date) {
         const dateSection = document.getElementById('eventDateSection');
         const dateEl = document.getElementById('eventDate');
         if (dateSection && dateEl) {
             const date = new Date(eventData.date);
-            dateEl.textContent = date.toLocaleDateString('en-US', { 
+            const now = new Date();
+            const oneDayAfterEvent = new Date(date);
+            oneDayAfterEvent.setDate(oneDayAfterEvent.getDate() + 1);
+            
+            let dateText = date.toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
             });
+            
+            // Add warning if event will expire soon (within 1 day after event)
+            if (now > date && now <= oneDayAfterEvent) {
+                dateText += ' ⚠️';
+                dateEl.innerHTML = dateText + '<br><span style="color: #f59e0b; font-size: 0.75rem; font-weight: 600;">Event expires in 1 day</span>';
+            } else {
+                dateEl.textContent = dateText;
+            }
+            
             dateSection.style.display = 'block';
         }
     }
