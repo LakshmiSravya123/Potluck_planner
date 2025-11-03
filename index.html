@@ -46,8 +46,17 @@
         }
       }
       
+      // Set on html element immediately
       document.documentElement.className = `theme-${detectedTheme}`;
-      document.body.className = `theme-${detectedTheme}`;
+      
+      // Set on body when it's ready
+      if (document.body) {
+        document.body.className = `theme-${detectedTheme}`;
+      } else {
+        document.addEventListener('DOMContentLoaded', function() {
+          document.body.className = `theme-${detectedTheme}`;
+        });
+      }
     })();
   </script>
 </head>
