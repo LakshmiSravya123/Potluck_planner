@@ -128,31 +128,13 @@ function initializeFirebase() {
             if (snap.val() === true) {
                 console.log('✅ Connected to Firebase!');
                 if (!isFirstConnection) {
-                    showToast('Reconnected to Firebase!', 'success');
+                    // Don't show reconnection toasts - too noisy
+                    console.log('🔄 Reconnected');
                 } else {
-                    showToast('Connected to Firebase!', 'success');
                     isFirstConnection = false;
                 }
-                reconnectAttempts = 0; // Reset on successful connection
             } else {
-                console.log('❌ Not connected to Firebase');
-                
-                // Try to reconnect if WebSocket failed
-                if (reconnectAttempts < maxReconnectAttempts) {
-                    reconnectAttempts++;
-                    console.log(`🔄 Reconnection attempt ${reconnectAttempts}/${maxReconnectAttempts}...`);
-                    showToast(`Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`, 'error');
-                    
-                    // Force reconnection cycle
-                    setTimeout(() => {
-                        database.goOffline();
-                        setTimeout(() => {
-                            database.goOnline();
-                        }, 500);
-                    }, 1000);
-                } else {
-                    showToast('Connection failed. Please refresh the page.', 'error');
-                }
+                console.log('⚠️ Firebase disconnected');
             }
         });
         
