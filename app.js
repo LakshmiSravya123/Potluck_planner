@@ -71,19 +71,37 @@ let allDishes = [];
 })();
 
 // Check URL for event code parameter (from QR code or shared link)
-window.addEventListener('DOMContentLoaded', () => {
+function checkUrlParameters() {
     const urlParams = new URLSearchParams(window.location.search);
     const codeFromUrl = urlParams.get('code');
     
-    if (codeFromUrl) {
+    console.log('Checking URL parameters:', { codeFromUrl, hasInput: !!eventCodeInput });
+    
+    if (codeFromUrl && eventCodeInput) {
         // Auto-fill event code from URL
         eventCodeInput.value = codeFromUrl.toUpperCase();
-        // Scroll to join section
-        document.getElementById('joinSection')?.scrollIntoView({ behavior: 'smooth' });
+        console.log('Event code auto-filled:', codeFromUrl.toUpperCase());
+        
+        // Focus on name input
+        if (userNameInput) {
+            userNameInput.focus();
+        }
         // Show a hint
-        showToast('Event code loaded! Enter your name to join.', 'success');
+        setTimeout(() => {
+            showToast('🎉 Event code loaded! Enter your name to join.', 'success');
+        }, 500);
     }
-});
+}
+
+// Run on page load
+window.addEventListener('DOMContentLoaded', checkUrlParameters);
+// Also run immediately in case DOMContentLoaded already fired
+if (document.readyState === 'loading') {
+    // Still loading, wait for DOMContentLoaded
+} else {
+    // DOM is ready, run now
+    checkUrlParameters();
+}
 
 // Event Listeners
 joinEventBtn.addEventListener('click', handleJoinEvent);
