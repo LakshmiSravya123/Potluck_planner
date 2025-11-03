@@ -88,11 +88,11 @@ function checkUrlParameters() {
         });
         
         if (codeFromUrl) {
-            const codeUpper = codeFromUrl.toUpperCase();
+            const codeLower = codeFromUrl.toLowerCase();
             
             if (codeInput) {
-                codeInput.value = codeUpper;
-                console.log('✅ Event code auto-filled:', codeUpper);
+                codeInput.value = codeLower;
+                console.log('✅ Event code auto-filled:', codeLower);
                 
                 // Focus on name input
                 if (nameInput) {
@@ -186,7 +186,7 @@ function handleJoinEvent() {
     
     currentUserName = userName;
     currentTheme = theme;
-    let eventCode = eventCodeInput.value.trim().toUpperCase();
+    let eventCode = eventCodeInput.value.trim().toLowerCase();
     
     if (!eventCode) {
         // Create new event
