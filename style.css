@@ -312,9 +312,47 @@ td:hover {
 .theme-autumn { background-image: url('https://images.unsplash.com/photo-1507487369694-724a9c7e9c3e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
 .theme-spring { background-image: url('https://images.unsplash.com/photo-1495231916356-a86217e8817e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
 
-/* READABILITY FIX */
-.container { background: rgba(255, 255, 255, 0.85); }
-.theme-halloween .container, .theme-pride .container { background: rgba(0, 0, 0, 0.7); color: white; }
+/* Better text readability on all themes */
+.container { 
+  background: rgba(255,255,255,0.95); 
+  color: #333;
+}
+
+/* Dark themes need light text */
+.theme-halloween .container, 
+.theme-pride .container { 
+  background: rgba(0,0,0,0.85); 
+  color: white; 
+}
+
+/* Text shadows for better readability */
+h1, h2, h3 {
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.theme-halloween h1,
+.theme-halloween h2,
+.theme-halloween h3,
+.theme-pride h1,
+.theme-pride h2,
+.theme-pride h3 {
+  text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
+}
+
+/* Ensure all text is visible */
+p, label, span, a {
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.theme-halloween p,
+.theme-halloween label,
+.theme-halloween span,
+.theme-pride p,
+.theme-pride label,
+.theme-pride span {
+  color: white;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+}
 
 /* MOBILE OPTIMIZED */
 @media (max-width: 600px) {
