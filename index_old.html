@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="description" content="AI-powered potluck planner with real-time collaboration, smart dish suggestions, and beautiful themes">
+    <title>Potluck Planner - Organize Your Perfect Gathering</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Potluck Planner">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Decorations -->
+    <div class="decorations" id="decorations"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <svg class="logo-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                        <path d="M7 2v20"></path>
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                    </svg>
+                    Potluck Planner
+                </h1>
+                <p class="tagline">Coordinate dishes, avoid duplicates, and make your gathering delicious!</p>
+            </div>
+        </header>
+
+        <!-- Event Setup Section -->
+        <section class="event-setup card">
+            <div class="section-icon-header">
+                <div class="section-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <h2 class="section-title">Create or Join Event</h2>
+            </div>
+            <div class="event-controls">
+                <div class="input-group">
+                    <label for="eventCode">Event Code</label>
+                    <input type="text" id="eventCode" placeholder="Enter event code or leave blank to create new">
+                </div>
+                <div class="input-group">
+                    <label for="eventTheme">Event Theme</label>
+                    <select id="eventTheme" required>
+                        <option value="default">🎉 Default Party</option>
+                        <option value="birthday">🎂 Birthday</option>
+                        <option value="christmas">🎄 Christmas</option>
+                        <option value="thanksgiving">🦃 Thanksgiving</option>
+                        <option value="halloween">🎃 Halloween</option>
+                        <option value="newyear">🎆 New Year</option>
+                        <option value="summer">☀️ Summer BBQ</option>
+                        <option value="spring">🌸 Spring Garden</option>
+                        <option value="wedding">💒 Wedding</option>
+                        <option value="graduation">🎓 Graduation</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="userName">Your Name</label>
+                    <input type="text" id="userName" placeholder="Enter your name" required>
+                </div>
+                <button id="joinEventBtn" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Join Event
+                </button>
+            </div>
+            <div id="eventInfo" class="event-info hidden">
+                <div class="event-code-display">
+                    <span class="label">Event Code:</span>
+                    <span id="currentEventCode" class="code"></span>
+                    <button id="copyCodeBtn" class="btn-icon" title="Copy code">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="event-theme-display">
+                    <span class="label">Theme:</span>
+                    <span id="currentEventTheme" class="theme-badge"></span>
+                </div>
+                <div class="event-stats" style="display: flex; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🍽️</span>
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);" id="dishCount">0</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-600);">Dishes</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">👥</span>
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);" id="contributorCount">0</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-600);">Contributors</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="share-text">Share this code with others to let them join!</p>
+                
+                <!-- Share Options -->
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <button id="generateQRBtn" class="btn" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="5" height="5"></rect>
+                            <rect x="16" y="3" width="5" height="5"></rect>
+                            <rect x="3" y="16" width="5" height="5"></rect>
+                            <path d="M21 16h-3a2 2 0 0 0-2 2v3"></path>
+                        </svg>
+                        📱 Generate QR Code
+                    </button>
+                    <button id="sendReminderBtn" class="btn" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        ✉️ Send Email Reminder
+                    </button>
+                </div>
+                
+                <!-- Viral Share & Export Buttons -->
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <button id="shareWhatsAppBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #25D366, #128C7E); color: white;">
+                        📱 Share on WhatsApp
+                    </button>
+                    <button id="shareTwitterBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #1DA1F2, #0d8bd9); color: white;">
+                        🐦 Share on X
+                    </button>
+                    <button id="exportMenuBtn" class="btn" style="flex: 1; min-width: 150px; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white;">
+                        📄 Export Menu
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Dish Section -->
+        <section id="addDishSection" class="add-dish card hidden">
+            <div class="section-icon-header">
+                <div class="section-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                </div>
+                <h2 class="section-title">Add Your Dish</h2>
+            </div>
+            
+            <!-- AI Suggestions Button -->
+            <button type="button" id="aiSuggestionsBtn" class="btn" style="width: 100%; margin-bottom: 1.5rem; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                    <path d="M2 12l10 5 10-5"></path>
+                </svg>
+                ✨ Get AI Dish Suggestions
+            </button>
+            
+            <form id="addDishForm" class="dish-form">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="dishName">Dish Name ✨ AI-powered</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required style="flex: 1;">
+                            <button type="button" id="voiceInputBtn" class="btn" style="padding: 0.75rem 1rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; white-space: nowrap;">
+                                🎤 Voice
+                            </button>
+                        </div>
+                        <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">Type or speak a dish name to see AI-generated image preview</small>
+                    </div>
+                    <div class="input-group">
+                        <label for="dishCategory">Category</label>
+                        <select id="dishCategory" required>
+                            <option value="">Select category</option>
+                            <option value="appetizer">Appetizer</option>
+                            <option value="main">Main Course</option>
+                            <option value="side">Side Dish</option>
+                            <option value="dessert">Dessert</option>
+                            <option value="beverage">Beverage</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- AI Image Preview -->
+                <div id="dishImagePreview" style="display: none; margin: 1rem 0; padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; border: 2px dashed var(--primary-light);"></div>
+                
+                <div class="input-group">
+                    <label for="dishNotes">Notes (optional)</label>
+                    <input type="text" id="dishNotes" placeholder="e.g., Vegetarian, serves 8">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Dish
+                </button>
+            </form>
+        </section>
+
+        <!-- Dishes List Section -->
+        <section id="dishesSection" class="dishes-list card hidden">
+            <div class="section-header">
+                <div class="section-icon-header">
+                    <div class="section-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                            <path d="M7 2v20"></path>
+                            <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                        </svg>
+                    </div>
+                    <h2 class="section-title">Event Menu</h2>
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="appetizer">Appetizers</button>
+                    <button class="filter-btn" data-category="main">Main</button>
+                    <button class="filter-btn" data-category="side">Sides</button>
+                    <button class="filter-btn" data-category="dessert">Desserts</button>
+                    <button class="filter-btn" data-category="beverage">Beverages</button>
+                </div>
+            </div>
+            
+            <!-- Menu Card Button -->
+            <button id="viewMenuCardBtn" class="btn" style="width: 100%; margin-bottom: 1.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                </svg>
+                📋 View Complete Menu Card
+            </button>
+            <div id="dishesList" class="dishes-grid">
+                <!-- Dishes will be populated here -->
+            </div>
+            <div id="emptyState" class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                    <path d="M7 2v20"></path>
+                    <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                </svg>
+                <p>No dishes added yet. Be the first to contribute!</p>
+            </div>
+        </section>
+
+        <!-- Photo Gallery Section -->
+        <section id="photoSection" class="photo-gallery card hidden">
+            <div class="section-icon-header">
+                <div class="section-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                </div>
+                <h2 class="section-title">📸 Dish Photos</h2>
+            </div>
+            
+            <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+                Share photos of your dishes! See what everyone's bringing before the event.
+            </p>
+            
+            <!-- Upload Section -->
+            <div class="photo-upload-section" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05)); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem;">
+                <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                <button id="uploadPhotoBtn" class="btn btn-primary" style="width: 100%; padding: 1.25rem;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    📸 Upload Dish Photo
+                </button>
+                <small style="display: block; margin-top: 1rem; color: var(--gray-500); text-align: center;">
+                    ✨ Stored in Firebase • Unlimited uploads • Max 2MB per photo
+                </small>
+            </div>
+            
+            <!-- Photo Grid -->
+            <div id="photoGallery" class="photo-grid">
+                <!-- Photos will be populated here -->
+            </div>
+            
+            <div id="emptyPhotos" class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <p>No photos yet. Be the first to share your dish!</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Made with ❤️ for potluck lovers everywhere</p>
+            <p class="footer-links">
+                <a href="https://github.com/LakshmiSravya123/Potluck_planner" target="_blank" rel="noopener">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    View on GitHub
+                </a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
