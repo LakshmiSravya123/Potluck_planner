@@ -9,11 +9,71 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <script src="firebase-config.js"></script> <!-- Your Firebase keys -->
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #e91e63;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-box {
+      background: #f0f8ff;
+      padding: 30px;
+      border-radius: 16px;
+      color: #333;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background: #218838;
+      transform: translateY(-2px);
+    }
+    #share-link {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      color: #333;
+    }
+    a {
+      color: #9c27b0;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>🎉 Create Your Themed Potluck!</h1>
-    <div style="background:#f0f8ff; padding:30px; border-radius:16px;">
+    <div class="form-box">
       <input type="text" id="new-event-name" placeholder="Event Name (e.g., Diwali Dinner)" style="width:100%; padding:15px; margin:10px 0; border-radius:8px; border:1px solid #ddd;" />
       <select id="new-theme" style="width:100%; padding:15px; margin:10px 0; border-radius:8px; border:1px solid #ddd;">
         <option value="neutral">🍴 Classic</option>
