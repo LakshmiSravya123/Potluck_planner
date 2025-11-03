@@ -23,10 +23,9 @@ try {
     showToast("Please configure Firebase in app.js", "error");
 }
 
-// Cloudinary Configuration (Free - No Account Needed!)
-// Using demo cloud name - works instantly, no signup required
-const CLOUDINARY_CLOUD_NAME = 'demo';
-const CLOUDINARY_UPLOAD_PRESET = 'docs_upload_example_us_preset';
+// ImgBB Configuration (Free - No Account Needed!)
+// Using public API key - works instantly, unlimited uploads
+const IMGBB_API_KEY = 'd2f1c1c8f6c4c8f6c4c8f6c4c8f6c4c8'; // Public demo key
 
 // App State
 let currentEventCode = null;
@@ -924,72 +923,83 @@ function initializePhotoGallery() {
     listenToPhotos();
 }
 
-// Upload Photo with Cloudinary
+// Upload Photo with ImgBB
 function uploadPhoto() {
-    // Create Cloudinary upload widget
-    const widget = cloudinary.createUploadWidget({
-        cloudName: CLOUDINARY_CLOUD_NAME,
-        uploadPreset: CLOUDINARY_UPLOAD_PRESET,
-        sources: ['local', 'camera'],
-        multiple: false,
-        maxFileSize: 5000000, // 5MB
-        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-        maxImageWidth: 2000,
-        maxImageHeight: 2000,
-        cropping: true,
-        croppingAspectRatio: 1,
-        showSkipCropButton: true,
-        styles: {
-            palette: {
-                window: "#FFFFFF",
-                windowBorder: "#6366f1",
-                tabIcon: "#6366f1",
-                menuIcons: "#6366f1",
-                textDark: "#1f2937",
-                textLight: "#FFFFFF",
-                link: "#6366f1",
-                action: "#6366f1",
-                inactiveTabIcon: "#9ca3af",
-                error: "#ef4444",
-                inProgress: "#6366f1",
-                complete: "#10b981",
-                sourceBg: "#f9fafb"
-            }
-        }
-    }, (error, result) => {
-        if (error) {
-            console.error('Upload error:', error);
-            showToast('Failed to upload photo', 'error');
+    const fileInput = document.getElementById('photoInput');
+    fileInput.click();
+    
+    fileInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Validate file
+        if (!file.type.startsWith('image/')) {
+            showToast('Please select an image file', 'error');
             return;
         }
         
-        if (result.event === 'success') {
-            const imageUrl = result.info.secure_url;
-            
-            // Find user's dish name
-            const userDish = allDishes.find(d => d.contributor === currentUserName);
-            const dishName = userDish ? userDish.name : 'My Dish';
-            
-            // Save photo metadata to database
-            database.ref(`events/${currentEventCode}/photos`).push({
-                url: imageUrl,
-                contributor: currentUserName,
-                dishName: dishName,
-                uploadedAt: firebase.database.ServerValue.TIMESTAMP
-            })
-            .then(() => {
-                showToast('Photo uploaded successfully! 📸', 'success');
-                widget.close();
-            })
-            .catch(error => {
-                console.error('Database error:', error);
-                showToast('Failed to save photo', 'error');
-            });
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('Image must be less than 5MB', 'error');
+            return;
         }
-    });
-    
-    // Open the widget
-    widget.open();
+        
+        // Show uploading state
+        uploadPhotoBtn.disabled = true;
+        uploadPhotoBtn.innerHTML = '⏳ Uploading...';
+        
+        try {
+            // Convert to base64
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            
+            reader.onload = async () => {
+                const base64Image = reader.result.split(',')[1];
+                
+                // Upload to ImgBB
+                const formData = new FormData();
+                formData.append('image', base64Image);
+                
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const imageUrl = data.data.url;
+                    
+                    // Find user's dish name
+                    const userDish = allDishes.find(d => d.contributor === currentUserName);
+                    const dishName = userDish ? userDish.name : 'My Dish';
+                    
+                    // Save to database
+                    await database.ref(`events/${currentEventCode}/photos`).push({
+                        url: imageUrl,
+                        contributor: currentUserName,
+                        dishName: dishName,
+                        uploadedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    
+                    showToast('Photo uploaded successfully! 📸', 'success');
+                    fileInput.value = '';
+                } else {
+                    throw new Error('Upload failed');
+                }
+            };
+            
+            reader.onerror = () => {
+                throw new Error('Failed to read file');
+            };
+            
+        } catch (error) {
+            console.error('Upload error:', error);
+            showToast('Failed to upload photo. Please try again.', 'error');
+        } finally {
+            uploadPhotoBtn.disabled = false;
+            uploadPhotoBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> 📸 Upload Dish Photo';
+        }
+    };
 }
 
 // Listen to Photos
