@@ -14,10 +14,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app, database;
+let app, database, storage;
 try {
     app = firebase.initializeApp(firebaseConfig);
     database = firebase.database();
+    storage = firebase.storage();
 } catch (error) {
     console.error("Firebase initialization error:", error);
     showToast("Please configure Firebase in app.js", "error");
@@ -233,6 +234,9 @@ function showEventInterface() {
     if (sendReminderBtn) {
         sendReminderBtn.addEventListener('click', sendEmailReminder);
     }
+    
+    // Initialize photo gallery
+    initializePhotoGallery();
 }
 
 // Copy Event Code
@@ -898,6 +902,179 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Photo Gallery Functions
+let uploadPhotoBtn = null;
+let photoListener = null;
+
+function initializePhotoGallery() {
+    const photoSection = document.getElementById('photoSection');
+    if (photoSection) {
+        photoSection.classList.remove('hidden');
+    }
+    
+    uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+    if (uploadPhotoBtn) {
+        uploadPhotoBtn.addEventListener('click', uploadPhoto);
+    }
+    
+    listenToPhotos();
+}
+
+// Upload Photo
+function uploadPhoto() {
+    const fileInput = document.getElementById('photoInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showToast('Please select a photo first', 'error');
+        return;
+    }
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showToast('Please select an image file', 'error');
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Image must be less than 5MB', 'error');
+        return;
+    }
+    
+    // Show uploading state
+    uploadPhotoBtn.disabled = true;
+    uploadPhotoBtn.innerHTML = '⏳ Uploading...';
+    
+    // Create storage reference
+    const timestamp = Date.now();
+    const storageRef = storage.ref(`events/${currentEventCode}/photos/${timestamp}_${file.name}`);
+    
+    // Upload file
+    const uploadTask = storageRef.put(file);
+    
+    uploadTask.on('state_changed',
+        (snapshot) => {
+            // Progress
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            uploadPhotoBtn.innerHTML = `⏳ ${Math.round(progress)}%`;
+        },
+        (error) => {
+            // Error
+            console.error('Upload error:', error);
+            showToast('Failed to upload photo. Make sure Firebase Storage is enabled!', 'error');
+            uploadPhotoBtn.disabled = false;
+            uploadPhotoBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg> Upload Photo';
+        },
+        () => {
+            // Success - get download URL
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                // Find user's dish name
+                const userDish = allDishes.find(d => d.contributor === currentUserName);
+                const dishName = userDish ? userDish.name : 'My Dish';
+                
+                // Save photo metadata to database
+                database.ref(`events/${currentEventCode}/photos`).push({
+                    url: downloadURL,
+                    contributor: currentUserName,
+                    dishName: dishName,
+                    uploadedAt: firebase.database.ServerValue.TIMESTAMP
+                })
+                .then(() => {
+                    showToast('Photo uploaded successfully! 📸', 'success');
+                    fileInput.value = '';
+                    uploadPhotoBtn.disabled = false;
+                    uploadPhotoBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg> Upload Photo';
+                })
+                .catch(error => {
+                    console.error('Database error:', error);
+                    showToast('Failed to save photo metadata', 'error');
+                });
+            });
+        }
+    );
+}
+
+// Listen to Photos
+function listenToPhotos() {
+    if (photoListener) {
+        photoListener.off();
+    }
+    
+    const photosRef = database.ref(`events/${currentEventCode}/photos`);
+    
+    photoListener = photosRef.on('value', (snapshot) => {
+        const photos = [];
+        snapshot.forEach((childSnapshot) => {
+            photos.push({
+                id: childSnapshot.key,
+                ...childSnapshot.val()
+            });
+        });
+        
+        renderPhotos(photos);
+    });
+}
+
+// Render Photos
+function renderPhotos(photos) {
+    const photoGallery = document.getElementById('photoGallery');
+    const emptyPhotos = document.getElementById('emptyPhotos');
+    
+    if (photos.length === 0) {
+        photoGallery.innerHTML = '';
+        if (emptyPhotos) emptyPhotos.classList.remove('hidden');
+        return;
+    }
+    
+    if (emptyPhotos) emptyPhotos.classList.add('hidden');
+    
+    // Sort by upload time (newest first)
+    photos.sort((a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0));
+    
+    photoGallery.innerHTML = photos.map(photo => {
+        const isOwner = photo.contributor === currentUserName;
+        return `
+            <div class="photo-card">
+                <img src="${photo.url}" alt="${escapeHtml(photo.dishName)}" loading="lazy">
+                <div class="photo-info">
+                    <div class="photo-dish-name">${escapeHtml(photo.dishName)}</div>
+                    <div class="photo-contributor">
+                        👤 ${escapeHtml(photo.contributor)}
+                    </div>
+                    ${isOwner ? `
+                        <button class="photo-delete-btn" onclick="deletePhoto('${photo.id}', '${photo.url}')">
+                            🗑️ Delete Photo
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Delete Photo
+function deletePhoto(photoId, photoUrl) {
+    if (!confirm('Are you sure you want to delete this photo?')) {
+        return;
+    }
+    
+    // Delete from storage
+    const storageRef = storage.refFromURL(photoUrl);
+    storageRef.delete()
+        .then(() => {
+            // Delete from database
+            return database.ref(`events/${currentEventCode}/photos/${photoId}`).remove();
+        })
+        .then(() => {
+            showToast('Photo deleted successfully', 'success');
+        })
+        .catch(error => {
+            console.error('Error deleting photo:', error);
+            showToast('Failed to delete photo', 'error');
+        });
+}
+
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     if (dishesListener) {
@@ -905,6 +1082,9 @@ window.addEventListener('beforeunload', () => {
     }
     if (themeListener) {
         themeListener.off();
+    }
+    if (photoListener) {
+        photoListener.off();
     }
 });
 
