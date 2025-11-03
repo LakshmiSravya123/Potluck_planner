@@ -296,27 +296,27 @@ td:hover {
   animation: bounce 2s infinite;
 }
 
-/* THEME IMAGE BACKGROUNDS */
-.theme-birthday { background-image: url('https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-christmas { background-image: url('https://images.unsplash.com/photo-1543589077-47c01b3f6483?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-halloween { background-image: url('https://images.unsplash.com/photo-1608513037773-9b40b056a7b4?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-valentines { background-image: url('https://images.unsplash.com/photo-1516585420163-5c8d7e5e6a3f?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-diwali { background-image: url('https://images.unsplash.com/photo-1570449848762-4e5a7e3d0586?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-thanksgiving { background-image: url('https://images.unsplash.com/photo-1571167398043-9e8db5d4b8e9?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-newyear { background-image: url('https://images.unsplash.com/photo-1541534741688-6078c6bfb5d5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-easter { background-image: url('https://images.unsplash.com/photo-1582582484031-0d5a4e1e0a0e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-bbq { background-image: url('https://images.unsplash.com/photo-1529193591184-b1b7b2c8e2e8?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-beach { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-wedding { background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-babyshower { background-image: url('https://images.unsplash.com/photo-1609951651556-5334e2706168?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-graduation { background-image: url('https://images.unsplash.com/photo-1523050858586-54b946a4e7e5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-superbowl { background-image: url('https://images.unsplash.com/photo-1518614369274-2c00e6e0b5e5?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-cinco { background-image: url('https://images.unsplash.com/photo-1558452918-35c7b7e60455?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-pride { background-image: url('https://images.unsplash.com/photo-1599305445678-4a525b5e5b5e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-ramadan { background-image: url('https://images.unsplash.com/photo-1580486877305-0e5e3e1e8c0d?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-hanukkah { background-image: url('https://images.unsplash.com/photo-1541605357697-6f4e2e3e5e5e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-autumn { background-image: url('https://images.unsplash.com/photo-1507487369694-724a9c7e9c3e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
-.theme-spring { background-image: url('https://images.unsplash.com/photo-1495231916356-a86217e8817e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80'); }
+/* THEME IMAGE BACKGROUNDS - FULL SCREEN! */
+.theme-birthday { background: url('https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-christmas { background: url('https://images.unsplash.com/photo-1543589077-47c01b3f6483?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-halloween { background: url('https://images.unsplash.com/photo-1608513037773-9b40b056a7b4?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-valentines { background: url('https://images.unsplash.com/photo-1516585420163-5c8d7e5e6a3f?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-diwali { background: url('https://images.unsplash.com/photo-1570449848762-4e5a7e3d0586?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-thanksgiving { background: url('https://images.unsplash.com/photo-1574672280600-4accfa5b6f98?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-newyear { background: url('https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-easter { background: url('https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-bbq { background: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-beach { background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-wedding { background: url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-babyshower { background: url('https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-graduation { background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-superbowl { background: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-cinco { background: url('https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-pride { background: url('https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-ramadan { background: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-hanukkah { background: url('https://images.unsplash.com/photo-1608233847894-4e9c1f9c7b5e?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-autumn { background: url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1920&q=80') center/cover fixed no-repeat !important; }
+.theme-spring { background: url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&q=80') center/cover fixed no-repeat !important; }
 
 /* Better text readability on all themes */
 .container { 
