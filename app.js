@@ -352,6 +352,15 @@ function listenToDishes() {
 function renderDishes(dishes) {
     allDishes = dishes; // Store globally for menu card
     
+    // Update stats
+    const dishCountEl = document.getElementById('dishCount');
+    const contributorCountEl = document.getElementById('contributorCount');
+    if (dishCountEl) dishCountEl.textContent = dishes.length;
+    if (contributorCountEl) {
+        const uniqueContributors = new Set(dishes.map(d => d.contributor));
+        contributorCountEl.textContent = uniqueContributors.size;
+    }
+    
     if (dishes.length === 0) {
         dishesList.innerHTML = '';
         emptyState.classList.remove('hidden');
@@ -505,6 +514,13 @@ function createDishCard(dish) {
                 ${dish.notes ? `<p class="dish-notes">📝 ${escapeHtml(dish.notes)}</p>` : ''}
                 ${isOwner ? `
                     <div class="dish-actions">
+                        <button class="btn-edit" onclick="editDish('${dish.id}', '${escapeHtml(dish.name).replace(/'/g, "\\'")}', '${escapeHtml(dish.notes || '').replace(/'/g, "\\'")}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Edit
+                        </button>
                         <button class="btn-delete" onclick="deleteDish('${dish.id}')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -517,6 +533,28 @@ function createDishCard(dish) {
             </div>
         </div>
     `;
+}
+
+// Edit Dish
+function editDish(dishId, currentName, currentNotes) {
+    const newName = prompt('Edit dish name:', currentName);
+    if (!newName || newName.trim() === '') return;
+    
+    const newNotes = prompt('Edit notes (optional):', currentNotes || '');
+    
+    const dishRef = database.ref(`events/${currentEventCode}/dishes/${dishId}`);
+    
+    dishRef.update({
+        name: newName.trim(),
+        notes: newNotes ? newNotes.trim() : ''
+    })
+    .then(() => {
+        showToast('Dish updated successfully! ✨', 'success');
+    })
+    .catch(error => {
+        console.error('Error updating dish:', error);
+        showToast('Failed to update dish', 'error');
+    });
 }
 
 // Delete Dish
