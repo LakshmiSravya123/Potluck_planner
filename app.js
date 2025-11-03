@@ -306,31 +306,45 @@ function renderDishes(dishes) {
 function createDishCard(dish) {
     const isOwner = dish.contributor === currentUserName;
     
+    // Category emoji mapping
+    const categoryEmojis = {
+        'appetizer': '🥗',
+        'main': '🍽️',
+        'side': '🥘',
+        'dessert': '🍰',
+        'beverage': '🥤',
+        'other': '🍴'
+    };
+    
+    const emoji = categoryEmojis[dish.category] || '🍴';
+    
     return `
         <div class="dish-card" data-category="${dish.category}">
-            <div class="dish-header">
-                <h3 class="dish-name">${escapeHtml(dish.name)}</h3>
-                <span class="dish-category ${dish.category}">${dish.category}</span>
-            </div>
-            <div class="dish-contributor">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span>${escapeHtml(dish.contributor)}</span>
-            </div>
-            ${dish.notes ? `<p class="dish-notes">${escapeHtml(dish.notes)}</p>` : ''}
-            ${isOwner ? `
-                <div class="dish-actions">
-                    <button class="btn-delete" onclick="deleteDish('${dish.id}')">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                        Delete
-                    </button>
+            <div class="dish-card-content">
+                <div class="dish-header">
+                    <h3 class="dish-name">${escapeHtml(dish.name)}</h3>
+                    <span class="dish-category ${dish.category}">${emoji} ${dish.category}</span>
                 </div>
-            ` : ''}
+                <div class="dish-contributor">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Brought by ${escapeHtml(dish.contributor)}</span>
+                </div>
+                ${dish.notes ? `<p class="dish-notes">📝 ${escapeHtml(dish.notes)}</p>` : ''}
+                ${isOwner ? `
+                    <div class="dish-actions">
+                        <button class="btn-delete" onclick="deleteDish('${dish.id}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Delete
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
         </div>
     `;
 }
