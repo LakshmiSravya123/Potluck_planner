@@ -3,135 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Create Potluck Event</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="style.css" /> <!-- Reuse your CSS -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-  <script src="firebase-config.js"></script> <!-- Your Firebase keys -->
-  <style>
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-      font-family: 'Poppins', sans-serif;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    }
-    h1 {
-      color: #e91e63;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .form-box {
-      background: #f0f8ff;
-      padding: 30px;
-      border-radius: 16px;
-      color: #333;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-    button {
-      background: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s;
-    }
-    button:hover {
-      background: #218838;
-      transform: translateY(-2px);
-    }
-    #share-link {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      color: #333;
-    }
-    a {
-      color: #9c27b0;
-      text-decoration: none;
-      font-weight: bold;
-    }
-  </style>
+  <title>Create Potluck</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+  <script src="firebase-config.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>🎉 Create Your Themed Potluck!</h1>
-    <div class="form-box">
-      <input type="text" id="new-event-name" placeholder="Event Name (e.g., Diwali Dinner)" style="width:100%; padding:15px; margin:10px 0; border-radius:8px; border:1px solid #ddd;" />
-      <select id="new-theme" style="width:100%; padding:15px; margin:10px 0; border-radius:8px; border:1px solid #ddd;">
-        <option value="neutral">🍴 Classic</option>
-        <option value="birthday">🎂 Birthday</option>
-        <option value="christmas">🎄 Christmas</option>
-        <option value="halloween">🎃 Halloween</option>
-        <option value="valentines">❤️ Valentines</option>
-        <option value="diwali">🪔 Diwali</option>
-        <option value="thanksgiving">🦃 Thanksgiving</option>
-        <option value="newyear">🎆 New Year</option>
-        <option value="easter">🐰 Easter</option>
-        <option value="bbq">🍔 BBQ</option>
-        <option value="beach">🏖️ Beach Party</option>
-        <option value="wedding">💒 Wedding</option>
-        <option value="babyshower">👶 Baby Shower</option>
-        <option value="graduation">🎓 Graduation</option>
-        <option value="superbowl">🏈 Super Bowl</option>
-        <option value="cinco">🌮 Cinco de Mayo</option>
-        <option value="pride">🌈 Pride</option>
-        <option value="ramadan">🌙 Ramadan</option>
-        <option value="hanukkah">🕎 Hanukkah</option>
-        <option value="autumn">🍂 Autumn</option>
-        <option value="spring">🌸 Spring</option>
-      </select>
-      <button onclick="createPotluckEvent()" style="padding:15px 30px; background:#28a745; color:white; border:none; border-radius:50px; font-size:18px; width:100%;">🚀 Create Event & Get Link!</button>
-      <div id="share-link" style="margin-top:20px; padding:20px; background:white; border-radius:8px; display:none;">
-        <p><strong>🎊 Ready!</strong></p>
-        <p id="link-text"></p>
-        <button onclick="copyLink()">📋 Copy</button>
-        <button onclick="openEvent()">🌐 Open Potluck</button>
-      </div>
-    </div>
-    <p style="text-align:center; margin-top:30px;"><a href="index.html">← Back to Potluck</a></p>
+    <h1>🎉 Create Potluck</h1>
+    <input type="text" id="new-event-name" placeholder="Event Name" />
+    <select id="new-theme">
+      <option value="birthday">🎂 Birthday</option>
+      <option value="christmas">🎄 Christmas</option>
+      <option value="halloween">🎃 Halloween</option>
+      <option value="valentines">❤️ Valentines</option>
+      <option value="diwali">🪔 Diwali</option>
+      <option value="thanksgiving">🦃 Thanksgiving</option>
+      <option value="newyear">🎆 New Year</option>
+      <option value="easter">🐰 Easter</option>
+      <option value="bbq">🍔 BBQ</option>
+      <option value="beach">🏖️ Beach</option>
+      <option value="wedding">💒 Wedding</option>
+      <option value="babyshower">👶 Baby Shower</option>
+      <option value="graduation">🎓 Graduation</option>
+      <option value="superbowl">🏈 Super Bowl</option>
+      <option value="cinco">🌮 Cinco</option>
+      <option value="pride">🌈 Pride</option>
+      <option value="ramadan">🌙 Ramadan</option>
+      <option value="hanukkah">🕎 Hanukkah</option>
+      <option value="autumn">🍂 Autumn</option>
+      <option value="spring">🌸 Spring</option>
+    </select>
+    <button onclick="createEvent()">Create & Get Link</button>
+    <p id="share-link"></p>
+    <p><a href="index.html">Back to App</a></p>
   </div>
 
   <script>
-    function createPotluckEvent() {
-      const eventName = document.getElementById('new-event-name').value.trim() || 'My Potluck';
-      const selectedTheme = document.getElementById('new-theme').value;
-      const newId = Date.now().toString(36);
-      const shareUrl = `${window.location.origin}${window.location.pathname.replace('create.html', 'index.html')}?id=${newId}&theme=${selectedTheme}&title=${encodeURIComponent(eventName)}`;
-      
-      // Save to Firebase
-      db.ref(`potlucks/${newId}/meta`).set({ name: eventName, theme: selectedTheme, created: Date.now() });
-      
-      document.getElementById('link-text').innerHTML = `Share: <a href="${shareUrl}" target="_blank">${shareUrl}</a>`;
-      document.getElementById('share-link').style.display = 'block';
-      window.eventUrl = shareUrl; // For buttons
-    }
-
-    function copyLink() {
-      navigator.clipboard.writeText(window.eventUrl);
-      alert('Copied!');
-    }
-
-    function openEvent() {
-      window.open(window.eventUrl, '_blank');
+    function createEvent() {
+      const name = document.getElementById('new-event-name').value || 'Potluck';
+      const theme = document.getElementById('new-theme').value;
+      const id = Date.now().toString(36);
+      const url = `${location.origin}/Potluck_planner/index.html?id=${id}&theme=${theme}&title=${encodeURIComponent(name)}`;
+      db.ref(`potlucks/${id}/meta`).set({ name, theme });
+      document.getElementById('share-link').innerHTML = `Share: <a href="${url}">${url}</a><br><button onclick="navigator.clipboard.writeText('${url}'); alert('Copied!')">Copy</button>`;
     }
   </script>
 </body>

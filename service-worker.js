@@ -1,24 +1,8 @@
-const CACHE_NAME = 'potluck-v2';
-const urlsToCache = [
-  '/Potluck_planner/',
-  '/Potluck_planner/index.html',
-  '/Potluck_planner/style.css',
-  '/Potluck_planner/app.js',
-  '/Potluck_planner/create.html',
-  '/Potluck_planner/firebase-config.js'
+const CACHE = 'potluck-v1';
+const FILES = [
+  '/', '/Potluck_planner/', '/Potluck_planner/index.html', '/Potluck_planner/style.css', '/Potluck_planner/app.js',
+  '/Potluck_planner/create.html', '/Potluck_planner/manifest.json', '/Potluck_planner/icon-192.png', '/Potluck_planner/icon-512.png'
 ];
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-      .catch(err => console.log('SW cache failed:', err))
-  );
-});
-
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request)
-      .then(response => response || fetch(e.request))
-  );
-});
+self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES))));
+self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
