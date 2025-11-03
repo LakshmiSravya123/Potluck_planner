@@ -230,20 +230,21 @@
             </div>
             
             <!-- AI Suggestions Button -->
-            <button type="button" id="aiSuggestionsBtn" class="btn" style="width: 100%; margin-bottom: 1.5rem; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                    <path d="M2 17l10 5 10-5"></path>
-                    <path d="M2 12l10 5 10-5"></path>
-                </svg>
-                ✨ Get AI Dish Suggestions
+            <button id="aiSuggestBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; margin-bottom: 0.5rem;" title="Get AI Dish Suggestions">
+                ✨
             </button>
             
             <form id="addDishForm" class="dish-form">
                 <div class="form-row">
                     <div class="input-group">
-                        <label for="dishName">Dish Name</label>
-                        <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required>
+                        <label for="dishName">Dish Name ✨ AI-powered</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="dishName" placeholder="e.g., Caesar Salad" required style="flex: 1;">
+                            <button type="button" id="voiceInputBtn" class="btn" style="padding: 0.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center;" title="Voice input">
+                                🎤
+                            </button>
+                        </div>
+                        <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">Type or speak a dish name to see AI-generated image preview</small>
                     </div>
                     <div class="input-group">
                         <label for="dishCategory">Category</label>
@@ -258,6 +259,9 @@
                         </select>
                     </div>
                 </div>
+                
+                <!-- AI Image Preview -->
+                <div id="dishImagePreview" style="display: none; margin: 1rem 0; padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; border: 2px dashed var(--primary-light);"></div>
                 
                 <div class="input-group">
                     <label for="dishNotes">Notes (optional)</label>
