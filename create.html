@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css" /> <!-- Reuse your CSS -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <script src="firebase-config.js"></script> <!-- Your Firebase keys -->
 </head>
 <body>
@@ -37,7 +38,7 @@
         <option value="autumn">🍂 Autumn</option>
         <option value="spring">🌸 Spring</option>
       </select>
-      <button onclick="createEvent()" style="padding:15px 30px; background:#28a745; color:white; border:none; border-radius:50px; font-size:18px; width:100%;">🚀 Create Event & Get Link!</button>
+      <button onclick="createPotluckEvent()" style="padding:15px 30px; background:#28a745; color:white; border:none; border-radius:50px; font-size:18px; width:100%;">🚀 Create Event & Get Link!</button>
       <div id="share-link" style="margin-top:20px; padding:20px; background:white; border-radius:8px; display:none;">
         <p><strong>🎊 Ready!</strong></p>
         <p id="link-text"></p>
@@ -49,7 +50,7 @@
   </div>
 
   <script>
-    function createEvent() {
+    function createPotluckEvent() {
       const eventName = document.getElementById('new-event-name').value.trim() || 'My Potluck';
       const selectedTheme = document.getElementById('new-theme').value;
       const newId = Date.now().toString(36);
@@ -58,7 +59,7 @@
       // Save to Firebase
       db.ref(`potlucks/${newId}/meta`).set({ name: eventName, theme: selectedTheme, created: Date.now() });
       
-      document.getElementById('link-text').innerHTML = `Share: <a href="${shareUrl}">${shareUrl}</a>`;
+      document.getElementById('link-text').innerHTML = `Share: <a href="${shareUrl}" target="_blank">${shareUrl}</a>`;
       document.getElementById('share-link').style.display = 'block';
       window.eventUrl = shareUrl; // For buttons
     }
