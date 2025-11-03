@@ -302,7 +302,9 @@ function generateEventCode() {
 
 // Create New Event
 function createEvent(eventCode, theme) {
-    const eventRef = database.ref(`events/${eventCode}`);
+    // ALWAYS store with lowercase for consistency
+    const eventCodeLower = eventCode.toLowerCase();
+    const eventRef = database.ref(`events/${eventCodeLower}`);
     
     eventRef.set({
         createdAt: firebase.database.ServerValue.TIMESTAMP,
@@ -310,7 +312,7 @@ function createEvent(eventCode, theme) {
         theme: theme || 'default'
     })
     .then(() => {
-        currentEventCode = eventCode;
+        currentEventCode = eventCodeLower;
         applyTheme(theme);
         showEventInterface();
         listenToDishes();
@@ -325,18 +327,21 @@ function createEvent(eventCode, theme) {
 
 // Join Existing Event
 function joinEvent(eventCode) {
-    console.log('🔍 Attempting to join event:', eventCode);
-    const eventRef = database.ref(`events/${eventCode}`);
+    // ALWAYS use lowercase for Firebase queries (case-insensitive)
+    const eventCodeLower = eventCode.toLowerCase();
+    console.log('🔍 Attempting to join event:', eventCode, '(stored as:', eventCodeLower + ')');
+    const eventRef = database.ref(`events/${eventCodeLower}`);
     
     eventRef.once('value')
         .then(snapshot => {
             console.log('📊 Firebase response:', {
                 exists: snapshot.exists(),
-                data: snapshot.val()
+                data: snapshot.val(),
+                queriedCode: eventCodeLower
             });
             
             if (snapshot.exists()) {
-                currentEventCode = eventCode;
+                currentEventCode = eventCodeLower;
                 const eventData = snapshot.val();
                 const theme = eventData.theme || 'default';
                 console.log('✅ Event found! Theme:', theme);
@@ -361,7 +366,8 @@ function joinEvent(eventCode) {
 
 // Show Event Interface
 function showEventInterface() {
-    currentEventCodeDisplay.textContent = currentEventCode;
+    // Display uppercase for readability, but store lowercase
+    currentEventCodeDisplay.textContent = currentEventCode.toUpperCase();
     currentEventThemeDisplay.textContent = themeNames[currentTheme] || currentTheme;
     eventInfo.classList.remove('hidden');
     addDishSection.classList.remove('hidden');
@@ -422,7 +428,8 @@ function showEventInterface() {
 
 // Copy Event Code
 function copyEventCode() {
-    navigator.clipboard.writeText(currentEventCode)
+    // Copy uppercase for sharing (more readable)
+    navigator.clipboard.writeText(currentEventCode.toUpperCase())
         .then(() => {
             showToast('Event code copied!', 'success');
         })
