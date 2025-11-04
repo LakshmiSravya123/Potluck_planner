@@ -1,0 +1,594 @@
+# 🚀 Quick Implementation Guide - 7 HIGH PRIORITY Features
+
+## Copy this file as `thanksgiving-enhanced.html` and it will have all 7 features!
+
+Due to file size limits, I'll provide the complete working code in sections you can copy-paste.
+
+## Complete Enhanced HTML File
+
+Save this as `thanksgiving-enhanced.html`:
+
+### Part 1: Head Section (Lines 1-150)
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦃 Thanksgiving Potluck 2025</title>
+    
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- QR Code Library - FEATURE #6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            background: linear-gradient(135deg, #fbbf24 0%, #ec4899 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* FEATURE #2: Category-based colors */
+        .category-appetizers { background: #dbeafe; color: #1e40af; }
+        .category-mains { background: #fecaca; color: #991b1b; }
+        .category-sides { background: #bbf7d0; color: #166534; }
+        .category-desserts { background: #fef3c7; color: #92400e; }
+        .category-drinks { background: #ddd6fe; color: #5b21b6; }
+        .category-other { background: #e5e7eb; color: #374151; }
+        
+        /* FEATURE #4: Inline editing styles */
+        .editable {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .editable:hover {
+            background: rgba(251, 191, 36, 0.1);
+        }
+        .editable:hover::after {
+            content: '✏️';
+            position: absolute;
+            margin-left: 8px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+        
+        /* FEATURE #7: Tooltip for notes */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #1f2937;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 12px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 13px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+```
+
+### Part 2: Body & Dashboard (Lines 151-250)
+```html
+<body class="min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-white mb-4">🦃 Thanksgiving Potluck 2025 🍂</h1>
+            
+            <!-- FEATURE #5: Keyboard Shortcuts Button -->
+            <button onclick="showShortcuts()" class="px-4 py-2 bg-white/90 rounded-xl shadow-lg">
+                ⌨️ Shortcuts (?)
+            </button>
+        </div>
+        
+        <!-- FEATURE #2: Dashboard with Category Breakdown -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-white/90 rounded-xl p-4 shadow-lg">
+                <div class="text-3xl">👥</div>
+                <div class="text-2xl font-bold" id="totalGuests">0</div>
+                <div class="text-sm text-gray-600">Total Guests</div>
+            </div>
+            <div class="bg-white/90 rounded-xl p-4 shadow-lg">
+                <div class="text-3xl">🍽️</div>
+                <div class="text-2xl font-bold" id="totalDishes">0</div>
+                <div class="text-sm text-gray-600">Total Dishes</div>
+            </div>
+            <div class="bg-white/90 rounded-xl p-4 shadow-lg">
+                <div class="text-sm font-semibold mb-2">📊 Categories</div>
+                <div id="categoryBreakdown" class="text-xs text-gray-600">-</div>
+            </div>
+        </div>
+        
+        <!-- FEATURE #3: Search Bar -->
+        <div class="mb-6">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    placeholder="🔍 Search guests or dishes..."
+                    onkeyup="filterGuests()"
+                    class="w-full px-6 py-4 rounded-2xl bg-white/90 border-2 border-amber-200 focus:border-amber-400 focus:outline-none text-lg">
+                <button onclick="clearSearch()" id="clearBtn" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">✕</button>
+            </div>
+            <p id="searchResults" class="text-sm text-white mt-2 hidden"></p>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex gap-3 mb-6">
+            <button onclick="showAddModal()" class="px-6 py-3 bg-amber-500 text-white font-bold rounded-xl shadow-lg">
+                ➕ Add Guest
+            </button>
+            <button onclick="exportCSV()" class="px-6 py-3 bg-white/90 rounded-xl shadow-lg">
+                📥 Export CSV
+            </button>
+            <button onclick="showQR()" class="px-6 py-3 bg-white/90 rounded-xl shadow-lg">
+                📱 QR Code
+            </button>
+        </div>
+```
+
+### Part 3: Table (Lines 251-300)
+```html
+        <!-- Table with all 7 features integrated -->
+        <div class="bg-white/90 rounded-2xl shadow-xl overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold">Avatar</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold">Dish</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold">Category</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold">Serves</th> <!-- FEATURE #1 -->
+                        <th class="px-4 py-3 text-left text-sm font-semibold">Notes</th> <!-- FEATURE #7 -->
+                        <th class="px-4 py-3 text-right text-sm font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="guestsList"></tbody>
+            </table>
+            <div id="emptyState" class="text-center py-12 hidden">
+                <div class="text-6xl">🍂</div>
+                <p class="text-xl mt-4">No guests yet</p>
+            </div>
+        </div>
+    </div>
+```
+
+### Part 4: Modals (Lines 301-400)
+```html
+    <!-- Add Guest Modal with ALL NEW FIELDS -->
+    <div id="addModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-3xl font-bold mb-6" id="modalTitle">Add Guest</h2>
+            <form onsubmit="saveGuest(event)" class="space-y-4">
+                <input type="hidden" id="guestId">
+                
+                <div>
+                    <label class="block font-bold mb-2">Name *</label>
+                    <input type="text" id="guestName" required class="w-full px-4 py-3 border-2 rounded-xl focus:border-amber-400">
+                </div>
+                
+                <div>
+                    <label class="block font-bold mb-2">Dish *</label>
+                    <input type="text" id="guestDish" required list="dishes" class="w-full px-4 py-3 border-2 rounded-xl focus:border-amber-400">
+                    <datalist id="dishes">
+                        <option value="🦃 Turkey">
+                        <option value="🥔 Mashed Potatoes">
+                        <option value="🥧 Pumpkin Pie">
+                        <option value="🍷 Wine">
+                    </datalist>
+                </div>
+                
+                <!-- FEATURE #2: Category Selector -->
+                <div>
+                    <label class="block font-bold mb-2">Category *</label>
+                    <select id="guestCategory" required class="w-full px-4 py-3 border-2 rounded-xl focus:border-amber-400">
+                        <option value="">Select...</option>
+                        <option value="appetizers">🥖 Appetizers</option>
+                        <option value="mains">🍗 Main Courses</option>
+                        <option value="sides">🥗 Side Dishes</option>
+                        <option value="desserts">🥧 Desserts</option>
+                        <option value="drinks">🍷 Drinks</option>
+                        <option value="other">🍴 Other</option>
+                    </select>
+                </div>
+                
+                <!-- FEATURE #1: Serves Field -->
+                <div>
+                    <label class="block font-bold mb-2">Serves (people)</label>
+                    <input type="number" id="guestServes" min="1" class="w-full px-4 py-3 border-2 rounded-xl focus:border-amber-400" placeholder="Optional">
+                </div>
+                
+                <!-- FEATURE #7: Notes Field -->
+                <div>
+                    <label class="block font-bold mb-2">Notes / Dietary Info</label>
+                    <textarea id="guestNotes" rows="3" class="w-full px-4 py-3 border-2 rounded-xl focus:border-amber-400" placeholder="Vegetarian, gluten-free, etc."></textarea>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button type="submit" class="flex-1 px-6 py-4 bg-amber-500 text-white font-bold rounded-xl">Save</button>
+                    <button type="button" onclick="hideModal()" class="px-6 py-4 bg-gray-200 rounded-xl">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- FEATURE #6: Real QR Code Modal -->
+    <div id="qrModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full">
+            <h3 class="text-2xl font-bold mb-6 text-center">Share Party 📱</h3>
+            <div id="qrcode" class="flex justify-center mb-6"></div>
+            <div class="flex gap-3">
+                <button onclick="downloadQR()" class="flex-1 px-6 py-3 bg-amber-500 text-white font-bold rounded-xl">📥 Download</button>
+                <button onclick="hideQR()" class="px-6 py-3 bg-gray-200 rounded-xl">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FEATURE #5: Keyboard Shortcuts Modal -->
+    <div id="shortcutsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-lg w-full">
+            <h3 class="text-2xl font-bold mb-6">⌨️ Keyboard Shortcuts</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between py-2 border-b">
+                    <span>Add Guest</span>
+                    <kbd class="px-3 py-1 bg-gray-100 rounded font-mono">Ctrl/⌘ + N</kbd>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span>Close Modal</span>
+                    <kbd class="px-3 py-1 bg-gray-100 rounded font-mono">Escape</kbd>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span>Show Shortcuts</span>
+                    <kbd class="px-3 py-1 bg-gray-100 rounded font-mono">?</kbd>
+                </div>
+            </div>
+            <button onclick="hideShortcuts()" class="w-full mt-6 px-6 py-3 bg-gray-200 rounded-xl">Got it!</button>
+        </div>
+    </div>
+    
+    <div id="toastContainer" class="fixed top-4 right-4 z-50"></div>
+```
+
+### Part 5: JavaScript - Core Functions (Lines 401-600)
+```javascript
+    <script>
+        let guests = [];
+        let editingId = null;
+        let qrInstance = null;
+        
+        const categoryIcons = {
+            appetizers: '🥖', mains: '🍗', sides: '🥗',
+            desserts: '🥧', drinks: '🍷', other: '🍴'
+        };
+        
+        // FEATURE #5: Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                showAddModal();
+            }
+            if (e.key === 'Escape') {
+                hideModal();
+                hideQR();
+                hideShortcuts();
+            }
+            if (e.key === '?' && !e.target.matches('input, textarea')) {
+                e.preventDefault();
+                showShortcuts();
+            }
+        });
+        
+        function showShortcuts() {
+            document.getElementById('shortcutsModal').classList.remove('hidden');
+        }
+        
+        function hideShortcuts() {
+            document.getElementById('shortcutsModal').classList.add('hidden');
+        }
+        
+        // Load/Save
+        function loadData() {
+            const stored = localStorage.getItem('thanksgivingGuests');
+            if (stored) guests = JSON.parse(stored);
+            render();
+        }
+        
+        function saveData() {
+            localStorage.setItem('thanksgivingGuests', JSON.stringify(guests));
+        }
+        
+        // Modal Management
+        function showAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = 'Add Guest';
+            document.getElementById('addModal').classList.remove('hidden');
+            document.querySelector('form').reset();
+        }
+        
+        function hideModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+        
+        // FEATURE #1, #2, #7: Save Guest with all new fields
+        function saveGuest(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('guestName').value.trim();
+            const dish = document.getElementById('guestDish').value.trim();
+            const category = document.getElementById('guestCategory').value;
+            const serves = document.getElementById('guestServes').value;
+            const notes = document.getElementById('guestNotes').value.trim();
+            
+            if (editingId) {
+                const guest = guests.find(g => g.id === editingId);
+                Object.assign(guest, {name, dish, category, serves: serves ? parseInt(serves) : null, notes});
+                showToast('Guest updated! ✅', 'success');
+            } else {
+                guests.push({
+                    id: Date.now().toString(),
+                    name, dish, category,
+                    serves: serves ? parseInt(serves) : null,
+                    notes,
+                    emoji: ['🎈','🍕','🥗','🥤','🎉'][Math.floor(Math.random()*5)]
+                });
+                showToast(`${name} added! 🎉`, 'success');
+            }
+            
+            saveData();
+            render();
+            hideModal();
+        }
+        
+        // FEATURE #4: Inline Editing
+        function startEdit(id, field) {
+            const guest = guests.find(g => g.id === id);
+            const value = guest[field];
+            const cell = event.target;
+            
+            cell.innerHTML = `
+                <input type="text" value="${value}" 
+                    class="px-2 py-1 border-2 rounded"
+                    onblur="saveEdit('${id}', '${field}', this.value)"
+                    onkeydown="if(event.key==='Enter') this.blur(); if(event.key==='Escape') render();"
+                    autofocus>
+            `;
+            cell.querySelector('input').select();
+        }
+        
+        function saveEdit(id, field, newValue) {
+            const guest = guests.find(g => g.id === id);
+            guest[field] = newValue;
+            saveData();
+            render();
+            showToast(`${field} updated!`, 'success');
+        }
+        
+        function editGuest(id) {
+            const guest = guests.find(g => g.id === id);
+            editingId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Guest';
+            document.getElementById('guestName').value = guest.name;
+            document.getElementById('guestDish').value = guest.dish;
+            document.getElementById('guestCategory').value = guest.category || 'other';
+            document.getElementById('guestServes').value = guest.serves || '';
+            document.getElementById('guestNotes').value = guest.notes || '';
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+        
+        function deleteGuest(id) {
+            if (confirm('Remove this guest?')) {
+                guests = guests.filter(g => g.id !== id);
+                saveData();
+                render();
+                showToast('Guest removed', 'info');
+            }
+        }
+        
+        // FEATURE #3: Search/Filter
+        function filterGuests() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const clearBtn = document.getElementById('clearBtn');
+            const resultsEl = document.getElementById('searchResults');
+            
+            if (search) {
+                clearBtn.classList.remove('hidden');
+                const filtered = guests.filter(g => 
+                    g.name.toLowerCase().includes(search) ||
+                    g.dish.toLowerCase().includes(search)
+                );
+                resultsEl.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} found`;
+                resultsEl.classList.remove('hidden');
+                renderGuests(filtered);
+            } else {
+                clearBtn.classList.add('hidden');
+                resultsEl.classList.add('hidden');
+                render();
+            }
+        }
+        
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            filterGuests();
+        }
+        
+        // FEATURE #2: Dashboard with Category Breakdown
+        function updateDashboard() {
+            document.getElementById('totalGuests').textContent = guests.length;
+            document.getElementById('totalDishes').textContent = guests.length;
+            
+            const categories = {};
+            guests.forEach(g => {
+                categories[g.category] = (categories[g.category] || 0) + 1;
+            });
+            
+            const breakdown = Object.entries(categories)
+                .map(([cat, count]) => `${categoryIcons[cat]} ${count}`)
+                .join(' • ');
+            
+            document.getElementById('categoryBreakdown').textContent = breakdown || 'No categories yet';
+        }
+        
+        // Render
+        function renderGuests(guestList = guests) {
+            const tbody = document.getElementById('guestsList');
+            const empty = document.getElementById('emptyState');
+            
+            if (guestList.length === 0) {
+                tbody.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            
+            empty.classList.add('hidden');
+            tbody.innerHTML = guestList.map(g => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-2xl">${g.emoji}</td>
+                    <td class="px-4 py-3 editable" onclick="startEdit('${g.id}', 'name')">${g.name}</td>
+                    <td class="px-4 py-3 editable" onclick="startEdit('${g.id}', 'dish')">${g.dish}</td>
+                    <td class="px-4 py-3">
+                        <span class="category-${g.category} px-3 py-1 rounded-full text-xs font-semibold">
+                            ${categoryIcons[g.category]} ${g.category}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">${g.serves || 'Not specified'}</td>
+                    <td class="px-4 py-3">
+                        ${g.notes ? `
+                            <div class="tooltip">
+                                <span class="text-xl">ℹ️</span>
+                                <span class="tooltiptext">${g.notes}</span>
+                            </div>
+                        ` : '-'}
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <button onclick="editGuest('${g.id}')" class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+                        <button onclick="deleteGuest('${g.id}')" class="text-red-600 hover:text-red-800">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function render() {
+            renderGuests();
+            updateDashboard();
+        }
+        
+        // FEATURE #6: Real QR Code
+        function showQR() {
+            document.getElementById('qrModal').classList.remove('hidden');
+            const qrDiv = document.getElementById('qrcode');
+            qrDiv.innerHTML = '';
+            qrInstance = new QRCode(qrDiv, {
+                text: window.location.href,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff"
+            });
+        }
+        
+        function hideQR() {
+            document.getElementById('qrModal').classList.add('hidden');
+        }
+        
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            const url = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'thanksgiving-potluck-qr.png';
+            a.click();
+            showToast('QR Code downloaded! 📥', 'success');
+        }
+        
+        // Export CSV
+        function exportCSV() {
+            const csv = [
+                ['Name', 'Dish', 'Category', 'Serves', 'Notes'],
+                ...guests.map(g => [g.name, g.dish, g.category, g.serves || '', g.notes || ''])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `thanksgiving-potluck-${Date.now()}.csv`;
+            a.click();
+            showToast('CSV exported! 📄', 'success');
+        }
+        
+        // Toast
+        function showToast(msg, type = 'info') {
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg mb-2`;
+            toast.textContent = msg;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
+```
+
+## ✅ All 7 Features Implemented!
+
+1. **✅ Serves Column** - Added input in modal, displays in table
+2. **✅ Category Selector** - Dropdown with 6 categories, color-coded badges, dashboard breakdown
+3. **✅ Search/Filter** - Real-time search with results count and clear button
+4. **✅ Inline Editing** - Click name/dish to edit, shows pencil icon on hover
+5. **✅ Keyboard Shortcuts** - Ctrl+N, Escape, ? with help modal
+6. **✅ Real QR Code** - Uses QRCode.js library with download function
+7. **✅ Notes/Dietary Info** - Textarea in modal, ℹ️ icon with tooltip in table
+
+## 🚀 To Use:
+
+1. Copy all the code sections above into a single file named `thanksgiving-enhanced.html`
+2. Open in browser
+3. All features work immediately!
+
+## 📝 Quick Test:
+
+1. Press `Ctrl+N` to add guest
+2. Fill all fields including Category, Serves, Notes
+3. Click name/dish in table to edit inline
+4. Use search bar to filter
+5. Click QR Code button to generate and download
+6. Press `?` to see all shortcuts
+
+**File is ready to deploy to GitHub Pages!**
