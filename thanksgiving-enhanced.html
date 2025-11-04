@@ -14,6 +14,8 @@
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { background: linear-gradient(135deg, #fbbf24 0%, #ec4899 100%); font-family: 'Inter', sans-serif; transition: background 0.3s ease; }
@@ -30,6 +32,37 @@
         .tooltip { position: relative; cursor: help; }
         .tooltip .tooltiptext { visibility: hidden; width: 220px; background-color: #1f2937; color: #fff; text-align: left; border-radius: 8px; padding: 10px 12px; position: absolute; z-index: 1000; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 13px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        
+        /* Falling Leaves Animation */
+        .leaf {
+            position: fixed;
+            top: -50px;
+            width: 30px;
+            height: 30px;
+            opacity: 0.7;
+            animation: fall linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        
+        /* Slot taken styling */
+        .slot-taken {
+            opacity: 0.6;
+            background: #f3f4f6;
+            cursor: not-allowed;
+        }
+        .slot-taken.dark { background: #374151; }
+        
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; }
@@ -176,6 +209,13 @@
                 <div><label class="block font-bold mb-2 dark:text-gray-200">Category *</label><select id="guestCategory" required class="w-full px-4 py-3 border-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:border-amber-400"><option value="">Select...</option><option value="appetizers">🥖 Appetizers</option><option value="mains">🍗 Main Courses</option><option value="sides">🥗 Side Dishes</option><option value="desserts">🥧 Desserts</option><option value="drinks">🍷 Drinks</option><option value="other">🍴 Other</option></select></div>
                 <div><label class="block font-bold mb-2 dark:text-gray-200">Serves (people)</label><input type="number" id="guestServes" min="1" class="w-full px-4 py-3 border-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:border-amber-400" placeholder="Optional"></div>
                 <div><label class="block font-bold mb-2 dark:text-gray-200">Notes / Dietary Info</label><textarea id="guestNotes" rows="3" class="w-full px-4 py-3 border-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:border-amber-400" placeholder="Vegetarian, gluten-free, etc."></textarea></div>
+                
+                <!-- Suggested Dishes -->
+                <div id="suggestedDishes" class="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-2 border-orange-300 dark:border-orange-700 rounded-xl p-4">
+                    <h4 class="font-bold text-orange-900 dark:text-orange-200 text-sm mb-2">🎃 Suggested Dishes (Available Slots)</h4>
+                    <div id="slotsList" class="text-xs text-orange-800 dark:text-orange-300 space-y-1"></div>
+                </div>
+                
                 <div class="flex gap-4"><button type="submit" class="flex-1 px-6 py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl">Save</button><button type="button" onclick="hideModal()" class="px-6 py-4 bg-gray-200 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-xl">Cancel</button></div>
             </form>
         </div>
@@ -245,6 +285,94 @@
         let guests = [], editingId = null, qrInstance = null;
         let currentEventId = null, isViewMode = false, lastSyncTime = 0, syncInterval = null;
         const categoryIcons = { appetizers: '🥖', mains: '🍗', sides: '🥗', desserts: '🥧', drinks: '🍷', other: '🍴' };
+        
+        // Predefined Slots System
+        const predefinedSlots = {
+            appetizers: [
+                { dish: "Deviled Eggs", needed: 2, taken: [] },
+                { dish: "Cheese Platter", needed: 1, taken: [] },
+                { dish: "Veggie Tray", needed: 2, taken: [] },
+                { dish: "Spinach Dip", needed: 1, taken: [] }
+            ],
+            mains: [
+                { dish: "Turkey", needed: 1, taken: [], note: "Host provides" },
+                { dish: "Ham", needed: 1, taken: [] },
+                { dish: "Roast Beef", needed: 1, taken: [] }
+            ],
+            sides: [
+                { dish: "Mashed Potatoes", needed: 3, taken: [] },
+                { dish: "Green Bean Casserole", needed: 2, taken: [] },
+                { dish: "Stuffing", needed: 2, taken: [] },
+                { dish: "Sweet Potato Casserole", needed: 2, taken: [] },
+                { dish: "Cranberry Sauce", needed: 2, taken: [] }
+            ],
+            desserts: [
+                { dish: "Pumpkin Pie", needed: 2, taken: [] },
+                { dish: "Apple Crisp", needed: 1, taken: [] },
+                { dish: "Pecan Pie", needed: 1, taken: [] },
+                { dish: "Cheesecake", needed: 1, taken: [] }
+            ],
+            drinks: [
+                { dish: "Wine", needed: 3, taken: [] },
+                { dish: "Cider", needed: 2, taken: [] },
+                { dish: "Soda", needed: 2, taken: [] }
+            ]
+        };
+        
+        // Duplicate Prevention
+        function checkDuplicate(dish, category) {
+            const slot = predefinedSlots[category]?.find(s => s.dish.toLowerCase() === dish.toLowerCase());
+            if (slot && slot.taken.length >= slot.needed) {
+                // Find alternatives
+                const alternatives = predefinedSlots[category]
+                    .filter(s => s.taken.length < s.needed)
+                    .map(s => s.dish)
+                    .slice(0, 3);
+                
+                if (alternatives.length > 0) {
+                    return {
+                        isDuplicate: true,
+                        message: `⚠️ ${dish} is already taken!\n\nTry these instead:\n• ${alternatives.join('\n• ')}`
+                    };
+                } else {
+                    return {
+                        isDuplicate: true,
+                        message: `⚠️ ${dish} is already taken and all ${category} slots are full!`
+                    };
+                }
+            }
+            return { isDuplicate: false };
+        }
+        
+        // Update slot tracking
+        function updateSlotTracking() {
+            // Reset all taken arrays
+            Object.values(predefinedSlots).forEach(category => {
+                category.forEach(slot => slot.taken = []);
+            });
+            
+            // Update with current guests
+            guests.forEach(guest => {
+                const slot = predefinedSlots[guest.category]?.find(s => 
+                    s.dish.toLowerCase() === guest.dish.toLowerCase()
+                );
+                if (slot) {
+                    slot.taken.push(guest.name);
+                }
+            });
+        }
+        
+        // Confetti celebration
+        function celebrate() {
+            if (typeof confetti !== 'undefined') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#FF7518', '#FFA500', '#FFD700', '#8B4513']
+                });
+            }
+        }
         
         // Dark Mode Toggle
         function toggleDarkMode() {
@@ -325,6 +453,7 @@
             }
             
             loadDarkMode();
+            updateSlotTracking();
             render();
         }
         
@@ -475,7 +604,38 @@
                 document.querySelectorAll('.no-print button').forEach(b => b.style.display = '');
             }
         }
-        function showAddModal() { editingId = null; document.getElementById('modalTitle').textContent = 'Add Guest'; document.getElementById('addModal').classList.remove('hidden'); document.querySelector('form').reset(); }
+        // Update suggested dishes list
+        function updateSuggestedDishes() {
+            const slotsList = document.getElementById('slotsList');
+            if (!slotsList) return;
+            
+            let html = '';
+            Object.entries(predefinedSlots).forEach(([category, slots]) => {
+                const available = slots.filter(s => s.taken.length < s.needed);
+                if (available.length > 0) {
+                    html += `<div class="mb-2"><strong>${categoryIcons[category]} ${category.charAt(0).toUpperCase() + category.slice(1)}:</strong><br>`;
+                    available.forEach(slot => {
+                        const remaining = slot.needed - slot.taken.length;
+                        html += `<span class="inline-block mr-2 mb-1 px-2 py-1 bg-white dark:bg-gray-700 rounded text-xs cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900" onclick="document.getElementById('guestDish').value='${slot.dish}'; document.getElementById('guestCategory').value='${category}'">• ${slot.dish} (${remaining} needed)</span>`;
+                    });
+                    html += '</div>';
+                }
+            });
+            
+            if (html === '') {
+                html = '<p class="text-center text-sm">All slots are filled! 🎉</p>';
+            }
+            
+            slotsList.innerHTML = html;
+        }
+        
+        function showAddModal() { 
+            editingId = null; 
+            document.getElementById('modalTitle').textContent = 'Add Guest'; 
+            document.getElementById('addModal').classList.remove('hidden'); 
+            document.querySelector('form').reset(); 
+            updateSuggestedDishes();
+        }
         function hideModal() { document.getElementById('addModal').classList.add('hidden'); }
         function saveGuest(e) {
             e.preventDefault();
@@ -484,19 +644,45 @@
             const category = document.getElementById('guestCategory').value;
             const serves = document.getElementById('guestServes').value;
             const notes = document.getElementById('guestNotes').value.trim();
+            
             if (isViewMode) {
                 showToast('🔒 View-only mode. Cannot edit.', 'warning');
                 return;
             }
+            
+            // Check for duplicates (only for new guests)
+            if (!editingId) {
+                const dupCheck = checkDuplicate(dish, category);
+                if (dupCheck.isDuplicate) {
+                    if (confirm(dupCheck.message + '\n\nDo you still want to add this dish?')) {
+                        // User confirmed, proceed
+                    } else {
+                        return; // User cancelled
+                    }
+                }
+            }
+            
             if (editingId) {
                 const guest = guests.find(g => g.id === editingId);
                 Object.assign(guest, {name, dish, category, serves: serves ? parseInt(serves) : null, notes});
                 showToast('Guest updated! ✅', 'success');
             } else {
-                guests.push({ id: Date.now().toString(), name, dish, category, serves: serves ? parseInt(serves) : null, notes, emoji: ['🎈','🍕','🥗','🥤','🎉'][Math.floor(Math.random()*5)] });
+                guests.push({ 
+                    id: Date.now().toString(), 
+                    name, dish, category, 
+                    serves: serves ? parseInt(serves) : null, 
+                    notes, 
+                    emoji: ['🎈','🍕','🥗','🥤','🎉'][Math.floor(Math.random()*5)] 
+                });
                 showToast(`${name} added! 🎉`, 'success');
+                celebrate(); // Trigger confetti!
             }
-            if (saveData()) { render(); hideModal(); }
+            
+            if (saveData()) { 
+                updateSlotTracking();
+                render(); 
+                hideModal(); 
+            }
         }
         function startEdit(id, field) {
             const guest = guests.find(g => g.id === id);
@@ -636,6 +822,7 @@
         }
         
         function render() {
+            updateSlotTracking();
             renderGuests();
             updateDashboard();
             
