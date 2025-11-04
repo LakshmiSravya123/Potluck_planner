@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">EventLink - Beautiful Free RSVP Tool</title>
-    <meta name="description" content="Create stunning RSVP pages for potlucks, meetings, parties - 100% free">
-    <meta property="og:title" content="EventLink - Beautiful Free RSVP Tool">
-    <meta property="og:description" content="Create stunning RSVP pages in seconds">
+    <title id="pageTitle">EventLink - Free RSVP Tool</title>
+    <meta name="description" content="Beautiful, free RSVP tool for potlucks, meetings, parties, and more">
+    <meta property="og:title" content="EventLink - Free RSVP Tool">
+    <meta property="og:description" content="Create beautiful RSVP pages in seconds">
     <meta property="og:image" content="">
     <meta name="theme-color" content="#3b82f6">
     
@@ -27,7 +27,7 @@
                 {
                     eventlink: {
                         "primary": "#3b82f6",
-                        "primary-focus": "#2563eb", 
+                        "primary-focus": "#2563eb",
                         "primary-content": "#ffffff",
                         "secondary": "#64748b",
                         "secondary-focus": "#475569",
@@ -108,40 +108,11 @@
             font-weight: 600; 
             color: white; 
             font-size: 14px;
-            flex-shrink: 0;
         }
-        
-        .table-striped tbody tr:nth-child(even) { background-color: rgba(248, 250, 252, 0.5); }
-        .dark .table-striped tbody tr:nth-child(even) { background-color: rgba(30, 41, 59, 0.5); }
         
         .theme-potluck { --theme-gradient: linear-gradient(135deg, #f97316, #ea580c); --theme-color: #f97316; }
         .theme-meeting { --theme-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8); --theme-color: #3b82f6; }
         .theme-party { --theme-gradient: linear-gradient(135deg, #ec4899, #be185d); --theme-color: #ec4899; }
-        
-        @media (max-width: 768px) {
-            .mobile-cards .table-row {
-                display: block;
-                background: white;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                margin-bottom: 0.75rem;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            }
-            
-            .mobile-cards .table-row td {
-                display: block;
-                padding: 0.25rem 0;
-                border: none !important;
-            }
-            
-            .mobile-cards .table-row td:before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: #64748b;
-                display: inline-block;
-                margin-right: 0.5rem;
-            }
-        }
     </style>
 </head>
 <body class="bg-base-200 font-sans" data-theme="eventlink">
@@ -286,6 +257,15 @@
                         </div>
                     </div>
                     
+                    <div id="slotsSection" class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">What can you bring?</span>
+                        </label>
+                        <div id="slotsList" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <!-- Dynamic slots will be rendered here -->
+                        </div>
+                    </div>
+                    
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text font-medium">Notes (optional)</span>
@@ -300,7 +280,7 @@
                 </form>
             </div>
             
-            <!-- Guest List - Prettier Table -->
+            <!-- Guest List -->
             <div class="bg-base-100 rounded-2xl shadow-xl p-6 mb-8">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-2xl font-bold">Guest List</h3>
@@ -316,27 +296,8 @@
                     </div>
                 </div>
                 
-                <!-- Desktop Table View -->
-                <div class="overflow-x-auto hidden md:block">
-                    <table class="table table-striped w-full">
-                        <thead>
-                            <tr>
-                                <th>Guest</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Notes</th>
-                                <th>Added</th>
-                            </tr>
-                        </thead>
-                        <tbody id="guestsTableBody">
-                            <!-- Guests will be rendered here -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Mobile Cards View -->
-                <div class="md:hidden mobile-cards" id="guestsMobileList">
-                    <!-- Mobile cards will be rendered here -->
+                <div id="guestsList" class="space-y-4">
+                    <!-- Guests will be rendered here -->
                 </div>
                 
                 <div id="noGuests" class="text-center py-8 text-gray-400">
@@ -458,6 +419,15 @@
                     </div>
                 </div>
                 
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Custom Slots (Optional)</span>
+                        <span class="label-text-alt">What can guests bring? One per line</span>
+                    </label>
+                    <textarea id="eventSlots" class="textarea textarea-bordered h-20" 
+                        placeholder="Pizza&#10;Salad&#10;Dessert&#10;Drinks"></textarea>
+                </div>
+                
                 <div class="modal-action">
                     <button type="button" onclick="hideCreateEvent()" class="btn btn-ghost">Cancel</button>
                     <button type="submit" class="btn btn-primary">
@@ -478,6 +448,6 @@
     <!-- Confetti Canvas -->
     <canvas id="confetti" class="fixed inset-0 pointer-events-none z-50"></canvas>
     
-    <script src="enhanced.js"></script>
+    <script src="eventlink.js"></script>
 </body>
 </html>
