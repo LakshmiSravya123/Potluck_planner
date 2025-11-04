@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍽️ Instant Potluck Planner</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Dynamic background styles */
+        .bg-theme {
+            transition: all 0.8s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .bg-theme::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
+        
+        .bg-default {
+            background: linear-gradient(135deg, #fbbf24 0%, #ec4899 100%);
+        }
+        
+        .bg-birthday {
+            background-image: url('https://images.unsplash.com/photo-1503424886303-4f7c2d8a6e9e?q=80&w=1200');
+        }
+        
+        .bg-festival {
+            background-image: url('https://images.unsplash.com/photo-1604328698692-bf2d8e1d5b59?q=80&w=1200');
+        }
+        
+        .bg-picnic {
+            background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200');
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(251, 191, 36, 0.5);
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(251, 191, 36, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-theme bg-default min-h-screen">
+    <div class="min-h-screen p-4 flex items-center justify-center">
+        <!-- Main Card -->
+        <div class="w-full max-w-4xl bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8 fade-in">
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                    🍽️ Potluck Planner
+                </h1>
+                <p class="text-gray-600 text-lg">Simple RSVP board for your gathering</p>
+            </header>
+            
+            <!-- Theme Selector -->
+            <section class="mb-8">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <label class="text-gray-700 font-medium">Choose Theme:</label>
+                    <select id="themeSelector" class="px-4 py-2 rounded-lg border border-gray-300 bg-white/90 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all">
+                        <option value="default">🌅 Default</option>
+                        <option value="birthday">🎂 Birthday</option>
+                        <option value="festival">🎉 Festival</option>
+                        <option value="picnic">🧺 Picnic</option>
+                    </select>
+                </div>
+            </section>
+            
+            <!-- RSVP Form -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Add Your RSVP</h2>
+                <form id="rsvpForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Name *
+                            </label>
+                            <input 
+                                type="text" 
+                                id="nameInput" 
+                                required
+                                class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white/90 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all"
+                                placeholder="Your name">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Attendance *
+                            </label>
+                            <select 
+                                id="attendanceInput" 
+                                required
+                                class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white/90 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all">
+                                <option value="">Select...</option>
+                                <option value="Yes">✅ Yes</option>
+                                <option value="Maybe">🤔 Maybe</option>
+                                <option value="No">❌ No</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                What will you bring?
+                            </label>
+                            <input 
+                                type="text" 
+                                id="bringingInput"
+                                class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white/90 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all"
+                                placeholder="e.g., Pasta salad">
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button 
+                            type="submit"
+                            class="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                            Add RSVP 🎉
+                        </button>
+                    </div>
+                </form>
+            </section>
+            
+            <!-- RSVP Table -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-800">
+                        RSVP List 
+                        <span id="rsvpCount" class="text-sm font-normal text-gray-600">(0)</span>
+                    </h2>
+                    <button 
+                        id="clearAllBtn"
+                        class="px-4 py-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg shadow hover:shadow-md transform hover:scale-105 transition-all duration-200">
+                        🗑️ Clear All
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-3 px-4 font-semibold text-gray-700">Name</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-700">Attendance</th>
+                                <th class="text-left py-3 px-4 font-semibold text-gray-700">Bringing</th>
+                                <th class="text-center py-3 px-4 font-semibold text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rsvpTableBody">
+                            <!-- RSVP rows will be inserted here -->
+                        </tbody>
+                    </table>
+                    
+                    <div id="emptyState" class="text-center py-12 text-gray-500">
+                        <div class="text-6xl mb-4">📋</div>
+                        <p class="text-lg">No RSVPs yet</p>
+                        <p class="text-sm">Be the first to add your RSVP!</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50"></div>
+    
+    <script>
+        // TODO: Replace localStorage with Google Sheets API for multi-user sync
+        // This would allow multiple users to see and update the same RSVP list in real-time
+        
+        class InstantPotluckPlanner {
+            constructor() {
+                this.rsvps = this.loadRSVPs();
+                this.currentTheme = this.loadTheme();
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.applyTheme(this.currentTheme);
+                this.renderTable();
+                this.updateCount();
+            }
+            
+            // Theme Management
+            loadTheme() {
+                return localStorage.getItem('potluckTheme') || 'default';
+            }
+            
+            saveTheme(theme) {
+                localStorage.setItem('potluckTheme', theme);
+                this.currentTheme = theme;
+            }
+            
+            applyTheme(theme) {
+                const body = document.body;
+                body.className = body.className.replace(/bg-\w+/, `bg-${theme}`);
+                this.saveTheme(theme);
+                
+                // Add fade-in animation to the main card
+                const mainCard = document.querySelector('.bg-white\\/80');
+                mainCard.classList.remove('fade-in');
+                void mainCard.offsetWidth; // Trigger reflow
+                mainCard.classList.add('fade-in');
+            }
+            
+            // RSVP Management
+            loadRSVPs() {
+                const stored = localStorage.getItem('potluckRSVPs');
+                return stored ? JSON.parse(stored) : [];
+            }
+            
+            saveRSVPs() {
+                localStorage.setItem('potluckRSVPs', JSON.stringify(this.rsvps));
+            }
+            
+            addRSVP(name, attendance, bringing) {
+                const rsvp = {
+                    id: Date.now().toString(),
+                    name: name.trim(),
+                    attendance: attendance,
+                    bringing: bringing.trim() || 'Not specified',
+                    timestamp: new Date().toISOString()
+                };
+                
+                this.rsvps.unshift(rsvp); // Add to beginning
+                this.saveRSVPs();
+                this.renderTable();
+                this.updateCount();
+                this.showToast('RSVP added! 🎉', 'success');
+            }
+            
+            removeRSVP(id) {
+                this.rsvps = this.rsvps.filter(rsvp => rsvp.id !== id);
+                this.saveRSVPs();
+                this.renderTable();
+                this.updateCount();
+                this.showToast('RSVP removed', 'info');
+            }
+            
+            clearAll() {
+                if (confirm('Are you sure you want to clear all RSVPs? This cannot be undone.')) {
+                    this.rsvps = [];
+                    this.saveRSVPs();
+                    this.renderTable();
+                    this.updateCount();
+                    this.showToast('All RSVPs cleared', 'warning');
+                }
+            }
+            
+            // Rendering
+            renderTable() {
+                const tbody = document.getElementById('rsvpTableBody');
+                const emptyState = document.getElementById('emptyState');
+                
+                if (this.rsvps.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                
+                tbody.innerHTML = this.rsvps.map((rsvp, index) => {
+                    const attendanceColors = {
+                        'Yes': 'text-green-600 bg-green-50',
+                        'Maybe': 'text-yellow-600 bg-yellow-50',
+                        'No': 'text-red-600 bg-red-50'
+                    };
+                    
+                    const attendanceIcons = {
+                        'Yes': '✅',
+                        'Maybe': '🤔',
+                        'No': '❌'
+                    };
+                    
+                    const rowClass = index % 2 === 0 ? 'bg-white/50' : 'bg-gray-50/50';
+                    
+                    return `
+                        <tr class="${rowClass} hover:bg-amber-50/50 transition-colors slide-in">
+                            <td class="py-3 px-4 font-medium text-gray-800">${this.escapeHtml(rsvp.name)}</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${attendanceColors[rsvp.attendance]}">
+                                    ${attendanceIcons[rsvp.attendance]} ${rsvp.attendance}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-gray-700">${this.escapeHtml(rsvp.bringing)}</td>
+                            <td class="py-3 px-4 text-center">
+                                <button 
+                                    onclick="potluck.removeRSVP('${rsvp.id}')"
+                                    class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-all">
+                                    🗑️
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            updateCount() {
+                const count = this.rsvps.length;
+                document.getElementById('rsvpCount').textContent = `(${count})`;
+            }
+            
+            // Utility Functions
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                
+                const colors = {
+                    success: 'bg-green-500',
+                    error: 'bg-red-500',
+                    warning: 'bg-yellow-500',
+                    info: 'bg-blue-500'
+                };
+                
+                toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg mb-2 fade-in`;
+                toast.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="mr-2">${message}</span>
+                    </div>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    toast.style.transition = 'all 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+            
+            // Event Binding
+            bindEvents() {
+                // Theme selector
+                document.getElementById('themeSelector').addEventListener('change', (e) => {
+                    this.applyTheme(e.target.value);
+                });
+                
+                // RSVP form
+                document.getElementById('rsvpForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('nameInput').value;
+                    const attendance = document.getElementById('attendanceInput').value;
+                    const bringing = document.getElementById('bringingInput').value;
+                    
+                    if (name && attendance) {
+                        this.addRSVP(name, attendance, bringing);
+                        e.target.reset();
+                        document.getElementById('nameInput').focus();
+                    }
+                });
+                
+                // Clear all button
+                document.getElementById('clearAllBtn').addEventListener('click', () => {
+                    this.clearAll();
+                });
+                
+                // Set initial theme selector value
+                document.getElementById('themeSelector').value = this.currentTheme;
+            }
+        }
+        
+        // Initialize the app
+        const potluck = new InstantPotluckPlanner();
+    </script>
+</body>
+</html>
