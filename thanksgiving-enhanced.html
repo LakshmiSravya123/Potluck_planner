@@ -60,16 +60,28 @@
                     <span id="darkModeIcon">🌙</span>
                 </button>
             </div>
-            <div class="flex items-center justify-center gap-3">
+            <div class="flex items-center justify-center gap-3 flex-wrap">
                 <button onclick="showShortcuts()" class="px-4 py-2 bg-white/90 dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-lg">⌨️ Shortcuts (?)</button>
                 <button onclick="shareLink()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg transition-colors">📋 Share Link (Live)</button>
                 <button onclick="createNewEvent()" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl shadow-lg transition-colors">➕ New Event</button>
+                <button onclick="saveOfflineCopy()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-lg transition-colors" title="Save a backup copy to your device">💾 Save Offline</button>
             </div>
         </div>
         <div class="grid grid-cols-3 gap-4 mb-6">
             <div class="bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-lg"><div class="text-3xl">👥</div><div class="text-2xl font-bold dark:text-white" id="totalGuests">0</div><div class="text-sm text-gray-600 dark:text-gray-400">Total Guests</div></div>
             <div class="bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-lg"><div class="text-3xl">🍽️</div><div class="text-2xl font-bold dark:text-white" id="totalDishes">0</div><div class="text-sm text-gray-600 dark:text-gray-400">Total Dishes</div></div>
             <div class="bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-lg"><div class="text-sm font-semibold mb-2 dark:text-gray-200">📊 Categories</div><div id="categoryBreakdown" class="text-xs text-gray-600 dark:text-gray-400">-</div></div>
+        </div>
+        <!-- Info Banner -->
+        <div id="infoBanner" class="hidden mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <span class="text-2xl">💡</span>
+                <div class="flex-1">
+                    <h4 class="font-bold text-blue-900 dark:text-blue-200 text-sm">Offline Mode</h4>
+                    <p class="text-blue-800 dark:text-blue-300 text-xs mt-1">You're working offline. Click "Share Link (Live)" to enable real-time collaboration!</p>
+                </div>
+                <button onclick="document.getElementById('infoBanner').classList.add('hidden')" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">✕</button>
+            </div>
         </div>
         <!-- Missing Categories Alert -->
         <div id="missingAlert" class="hidden mb-6 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-xl p-4">
@@ -215,9 +227,17 @@
                 // Start auto-sync
                 startAutoSync();
             } else {
-                // Legacy mode - use localStorage
-                const stored = localStorage.getItem('thanksgivingGuests');
-                if (stored) guests = JSON.parse(stored);
+                // No event in URL - check for offline backups
+                const lastEventId = localStorage.getItem('lastEventId');
+                const legacyStored = localStorage.getItem('thanksgivingGuests');
+                
+                // If we have a recent offline backup, offer to load it
+                if (lastEventId && !legacyStored) {
+                    setTimeout(() => loadOfflineCopy(), 500);
+                } else if (legacyStored) {
+                    // Legacy mode - use localStorage
+                    guests = JSON.parse(legacyStored);
+                }
             }
             
             loadDarkMode();
@@ -303,6 +323,39 @@
             startAutoSync();
             render();
             showToast('New event created! Share the link to collaborate 🎉', 'success');
+        }
+        
+        // Save Offline Copy
+        function saveOfflineCopy() {
+            if (currentEventId) {
+                // Save current event to localStorage
+                localStorage.setItem(`event_${currentEventId}`, JSON.stringify(guests));
+                localStorage.setItem('lastEventId', currentEventId);
+                showToast('💾 Offline backup saved! Data accessible without internet ✅', 'success');
+            } else {
+                // Save to legacy localStorage
+                localStorage.setItem('thanksgivingGuests', JSON.stringify(guests));
+                showToast('💾 Saved to local storage ✅', 'success');
+            }
+        }
+        
+        // Load Offline Copy
+        function loadOfflineCopy() {
+            const lastEventId = localStorage.getItem('lastEventId');
+            if (lastEventId && confirm('Load your last saved offline event?')) {
+                const stored = localStorage.getItem(`event_${lastEventId}`);
+                if (stored) {
+                    guests = JSON.parse(stored);
+                    currentEventId = lastEventId;
+                    const mode = 'edit';
+                    window.location.hash = `event=${lastEventId}&mode=${mode}`;
+                    document.getElementById('liveIndicator').classList.remove('hidden');
+                    document.getElementById('viewModeBtn').classList.remove('hidden');
+                    startAutoSync();
+                    render();
+                    showToast('Offline backup loaded! 💾', 'success');
+                }
+            }
         }
         
         // Toggle View Mode
@@ -460,7 +513,18 @@
                 </tr>
             `).join('');
         }
-        function render() { renderGuests(); updateDashboard(); }
+        function render() {
+            renderGuests();
+            updateDashboard();
+            
+            // Show info banner if in offline mode (no event ID)
+            const infoBanner = document.getElementById('infoBanner');
+            if (!currentEventId && guests.length > 0) {
+                infoBanner.classList.remove('hidden');
+            } else {
+                infoBanner.classList.add('hidden');
+            }
+        }
         function showQR() {
             let url = window.location.href;
             
