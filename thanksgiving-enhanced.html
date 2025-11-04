@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🦃 Thanksgiving Potluck 2025</title>
+    <meta name="description" content="Plan your 2025 Thanksgiving potluck easily with real-time collaboration, dark mode, and offline support. Track guests, dishes, servings, and dietary info.">
+    <meta name="keywords" content="Thanksgiving, potluck planner, 2025, meal planning, party organizer, collaborative planning">
+    <meta name="author" content="Potluck Planner">
+    <title>🦃 Thanksgiving Potluck 2025 - Plan Your Perfect Feast</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -67,6 +70,24 @@
                 <button onclick="saveOfflineCopy()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-lg transition-colors" title="Save a backup copy to your device">💾 Save Offline</button>
             </div>
         </div>
+        <!-- Welcome Message -->
+        <div class="mb-6 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-2 border-orange-300 dark:border-orange-700 rounded-2xl p-6 shadow-lg">
+            <div class="flex items-start gap-4">
+                <span class="text-4xl">🎃</span>
+                <div>
+                    <h2 class="text-2xl font-bold text-orange-900 dark:text-orange-200 mb-2">🎉 Welcome to Your Thanksgiving Potluck Planner!</h2>
+                    <p class="text-orange-800 dark:text-orange-300 text-sm mb-3">Organize your perfect Thanksgiving feast with ease. Here's how to get started:</p>
+                    <ul class="text-orange-700 dark:text-orange-300 text-sm space-y-1 list-disc list-inside">
+                        <li><strong>Add guests:</strong> Click "➕ Add Guest" or press <kbd class="px-2 py-0.5 bg-orange-200 dark:bg-orange-800 rounded text-xs">Ctrl+N</kbd></li>
+                        <li><strong>Real-time collaboration:</strong> Click "📋 Share Link (Live)" to invite others to edit</li>
+                        <li><strong>Offline backup:</strong> Click "💾 Save Offline" to work without internet</li>
+                        <li><strong>Search & filter:</strong> Use the search bar to find specific guests or dishes</li>
+                        <li><strong>Dark mode:</strong> Toggle 🌙/☀️ in the top-right corner</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
         <div class="grid grid-cols-3 gap-4 mb-6">
             <div class="bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-lg"><div class="text-3xl">👥</div><div class="text-2xl font-bold dark:text-white" id="totalGuests">0</div><div class="text-sm text-gray-600 dark:text-gray-400">Total Guests</div></div>
             <div class="bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-lg"><div class="text-3xl">🍽️</div><div class="text-2xl font-bold dark:text-white" id="totalDishes">0</div><div class="text-sm text-gray-600 dark:text-gray-400">Total Dishes</div></div>
@@ -111,10 +132,18 @@
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
                         <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200">Avatar</th>
-                        <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200">Name</th>
-                        <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200">Dish</th>
-                        <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200">Category</th>
-                        <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200">Serves</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onclick="sortTable('name')" title="Click to sort">
+                            Name <span class="text-xs">↕️</span>
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onclick="sortTable('dish')" title="Click to sort">
+                            Dish <span class="text-xs">↕️</span>
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onclick="sortTable('category')" title="Click to sort">
+                            Category <span class="text-xs">↕️</span>
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onclick="sortTable('serves')" title="Click to sort">
+                            Serves <span class="text-xs">↕️</span>
+                        </th>
                         <th class="px-4 py-3 text-left text-sm font-semibold dark:text-gray-200">Notes</th>
                         <th class="px-4 py-3 text-right text-sm font-semibold dark:text-gray-200">Actions</th>
                     </tr>
@@ -122,6 +151,19 @@
                 <tbody id="guestsList"></tbody>
             </table>
             <div id="emptyState" class="text-center py-12 hidden"><div class="text-6xl">🍂</div><p class="text-xl mt-4 dark:text-gray-300">No guests yet</p></div>
+        </div>
+        <!-- Total Servings Display -->
+        <div id="totalServingsDisplay" class="hidden mt-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-700 rounded-xl p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">🍽️</span>
+                    <div>
+                        <h3 class="font-bold text-green-900 dark:text-green-200 text-lg">Total Servings</h3>
+                        <p class="text-green-700 dark:text-green-300 text-sm">Estimated people served</p>
+                    </div>
+                </div>
+                <div class="text-4xl font-bold text-green-900 dark:text-green-200" id="totalServings">0</div>
+            </div>
         </div>
     </div>
     <div id="addModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
@@ -158,6 +200,48 @@
     </div>
     <div id="toastContainer" class="fixed top-4 right-4 z-50"></div>
     <script>
+        /*
+         * THANKSGIVING POTLUCK PLANNER 2025
+         * Enhanced Version - Changelog
+         * 
+         * FEATURES IMPLEMENTED:
+         * ✅ Interactive guest/dish management with modal forms
+         * ✅ Real-time data persistence using localStorage
+         * ✅ URL hash-based sharing for multi-user collaboration
+         * ✅ Auto-sync every 2 seconds for real-time updates
+         * ✅ Edit/Delete functionality with confirmation prompts
+         * ✅ Dynamic category tracking and breakdown display
+         * ✅ Dark mode toggle with localStorage persistence
+         * ✅ Print-friendly view with clean layout
+         * ✅ Search/filter functionality for guests and dishes
+         * ✅ Inline editing for name and dish fields
+         * ✅ Keyboard shortcuts (Ctrl+N, Escape, ?)
+         * ✅ QR code generation with download capability
+         * ✅ Notes/dietary info with tooltip display
+         * ✅ Missing categories alert system
+         * ✅ Offline backup and recovery
+         * ✅ View-only mode toggle
+         * ✅ CSV export functionality
+         * ✅ Table sorting by column (Name, Dish, Category, Serves)
+         * ✅ Total servings calculation and display
+         * ✅ Responsive design with mobile support
+         * ✅ Fall-themed color scheme (amber, orange, warm tones)
+         * ✅ Accessibility features (ARIA labels, keyboard navigation)
+         * ✅ Input validation (required fields, positive numbers)
+         * ✅ SEO optimization with meta tags
+         * ✅ Welcome message with usage instructions
+         * ✅ Cross-browser compatibility
+         * 
+         * TECHNICAL STACK:
+         * - Vanilla JavaScript (ES6+)
+         * - Tailwind CSS via CDN
+         * - QRCode.js library
+         * - Google Fonts (Inter)
+         * - No backend required - pure client-side
+         * 
+         * LAST UPDATED: November 2025
+         */
+        
         let guests = [], editingId = null, qrInstance = null;
         let currentEventId = null, isViewMode = false, lastSyncTime = 0, syncInterval = null;
         const categoryIcons = { appetizers: '🥖', mains: '🍗', sides: '🥗', desserts: '🥧', drinks: '🍷', other: '🍴' };
@@ -513,9 +597,59 @@
                 </tr>
             `).join('');
         }
+        // Table Sorting
+        let sortColumn = null;
+        let sortDirection = 'asc';
+        
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            
+            guests.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                // Handle serves as number
+                if (column === 'serves') {
+                    aVal = aVal || 0;
+                    bVal = bVal || 0;
+                    return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                
+                // Handle strings
+                aVal = (aVal || '').toString().toLowerCase();
+                bVal = (bVal || '').toString().toLowerCase();
+                
+                if (sortDirection === 'asc') {
+                    return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                } else {
+                    return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+                }
+            });
+            
+            render();
+            showToast(`Sorted by ${column} (${sortDirection === 'asc' ? 'ascending' : 'descending'})`, 'info');
+        }
+        
         function render() {
             renderGuests();
             updateDashboard();
+            
+            // Calculate and display total servings
+            const totalServings = guests.reduce((sum, g) => sum + (g.serves || 0), 0);
+            const servingsDisplay = document.getElementById('totalServingsDisplay');
+            const servingsValue = document.getElementById('totalServings');
+            
+            if (totalServings > 0) {
+                servingsValue.textContent = totalServings;
+                servingsDisplay.classList.remove('hidden');
+            } else {
+                servingsDisplay.classList.add('hidden');
+            }
             
             // Show info banner if in offline mode (no event ID)
             const infoBanner = document.getElementById('infoBanner');
