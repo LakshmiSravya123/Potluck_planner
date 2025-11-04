@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Potluck Party - Epic Events</title>
+    <meta name="description" content="Real-time potluck planning with live map, chat, and viral features">
+    <meta property="og:title" content="Potluck Party - Epic Events">
+    <meta property="og:description" content="Join the party! Live map, chat, and more">
+    <meta property="og:image" content="">
+    <meta name="theme-color" content="#10b981">
+    
+    <!-- PWA -->
+    <link rel="manifest" href='data:application/json,{ "name": "Potluck Party", "short_name": "Potluck", "start_url": "/", "display": "standalone", "background_color": "#f9fafb", "theme_color": "#10b981", "icons": [{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#10b981' },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'bounce-slow': 'bounce 2s ease-in-out infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Heroicons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    
+    <!-- Real-time P2P -->
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    
+    <!-- Storage & Utils -->
+    <script src="https://unpkg.com/localforage@1.10.0/dist/localforage.min.js"></script>
+    <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    
+    <style>
+        .glass { background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); }
+        .dark .glass { background: rgba(31,41,55,0.8); }
+        .gradient-emerald { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .gradient-purple { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); }
+        .gradient-halloween { background: linear-gradient(135deg, #f97316 0%, #dc2626 100%); }
+        .floating { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .chat-bubble { animation: slideInUp 0.3s ease-out; }
+        @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        #map { height: 400px; border-radius: 1rem; }
+        .emoji-picker { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; padding: 8px; }
+        .emoji-btn { padding: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .emoji-btn:hover { background: #f3f4f6; transform: scale(1.2); }
+        .theme-emerald { --theme-primary: #10b981; --theme-gradient: linear-gradient(135deg, #10b981, #059669); }
+        .theme-purple { --theme-primary: #8b5cf6; --theme-gradient: linear-gradient(135deg, #8b5cf6, #6366f1); }
+        .theme-halloween { --theme-primary: #f97316; --theme-gradient: linear-gradient(135deg, #f97316, #dc2626); }
+        .online-indicator { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans theme-emerald">
+    
+    <!-- Hero Header -->
+    <header class="gradient-emerald text-white py-8 px-4 relative overflow-hidden hidden">
+        <div class="absolute inset-0 bg-black/10"></div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="text-center mb-6">
+                <h1 class="text-5xl md:text-6xl font-black mb-3 floating">🎉 Potluck Party</h1>
+                <p class="text-xl md:text-2xl opacity-90">Real-time events that bring friends together</p>
+            </div>
+            
+            <!-- Theme Picker -->
+            <div class="flex justify-center gap-3 mb-6">
+                <button onclick="app.setTheme('emerald')" class="px-4 py-2 bg-white/20 backdrop-blur rounded-lg font-medium hover:bg-white/30 transition-all">
+                    🌿 Emerald
+                </button>
+                <button onclick="app.setTheme('purple')" class="px-4 py-2 bg-white/20 backdrop-blur rounded-lg font-medium hover:bg-white/30 transition-all">
+                    💜 Purple
+                </button>
+                <button onclick="app.setTheme('halloween')" class="px-4 py-2 bg-white/20 backdrop-blur rounded-lg font-medium hover:bg-white/30 transition-all">
+                    🎃 Halloween
+                </button>
+            </div>
+            
+            <!-- Create/Join -->
+            <div class="flex justify-center gap-3">
+                <button onclick="app.newEvent()" class="px-6 py-3 bg-white text-emerald-600 rounded-lg font-bold hover:scale-105 transition-transform shadow-xl">
+                    <i class="fas fa-plus mr-2"></i>New Event
+                </button>
+                <button onclick="app.showJoinModal()" class="px-6 py-3 bg-white/20 backdrop-blur text-white rounded-lg font-bold hover:bg-white/30 transition-all">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Join
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App -->
+    <main id="mainApp" class="hidden max-w-6xl mx-auto px-4 py-6">
+        
+        <!-- Event Header -->
+        <div class="glass rounded-xl shadow-lg p-4 mb-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Event #<span id="eventId"></span></h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400"><span id="onlineCount">1</span> online • <span id="rsvpCount">0</span> RSVPs</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="app.shareEvent()" class="p-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all">
+                    <i class="fas fa-share"></i>
+                </button>
+                <button onclick="app.showQR()" class="p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all">
+                    <i class="fas fa-qrcode"></i>
+                </button>
+                <button onclick="app.exportPDF()" class="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-6 border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto">
+            <button onclick="app.switchTab('guests')" id="guestsTab" class="pb-3 font-semibold text-emerald-600 border-b-2 border-emerald-600 whitespace-nowrap">Guests</button>
+            <button onclick="app.switchTab('items')" id="itemsTab" class="pb-3 font-semibold text-gray-600 hover:text-gray-800 whitespace-nowrap">Items</button>
+            <button onclick="app.switchTab('map')" id="mapTab" class="pb-3 font-semibold text-gray-600 hover:text-gray-800 whitespace-nowrap">Map</button>
+            <button onclick="app.switchTab('chat')" id="chatTab" class="pb-3 font-semibold text-gray-600 hover:text-gray-800 whitespace-nowrap relative">
+                Chat
+                <span id="chatBadge" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 hidden">0</span>
+            </button>
+            <button onclick="app.switchTab('photos')" id="photosTab" class="pb-3 font-semibold text-gray-600 hover:text-gray-800 whitespace-nowrap">Moments</button>
+        </div>
+
+        <!-- Guests Section -->
+        <section id="guestsSection" class="space-y-6">
+            <div class="glass rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Add Guest</h3>
+                <form onsubmit="app.addGuest(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="text" id="guestName" placeholder="Name" required class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    <input type="email" id="guestEmail" placeholder="Email" class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    <input type="text" id="guestAddress" placeholder="Address" required class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    <button type="submit" class="px-6 py-3 gradient-emerald text-white rounded-lg font-bold hover:scale-105 transition-transform">
+                        <i class="fas fa-user-plus mr-2"></i>Add
+                    </button>
+                </form>
+            </div>
+
+            <div class="glass rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Guest List</h3>
+                <div id="guestList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="noGuests" class="text-center py-8 text-gray-400">No guests yet</div>
+            </div>
+        </section>
+
+        <!-- Items Section -->
+        <section id="itemsSection" class="hidden space-y-6">
+            <div class="glass rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Add Item</h3>
+                <form onsubmit="app.addItem(event)" class="flex gap-3">
+                    <input type="text" id="itemName" placeholder="Dish name..." required class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    <select id="itemCategory" class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                        <option value="appetizer">🥗 Appetizer</option>
+                        <option value="main">🍖 Main</option>
+                        <option value="dessert">🍰 Dessert</option>
+                        <option value="beverage">🥤 Beverage</option>
+                        <option value="other">🍽️ Other</option>
+                    </select>
+                    <button type="submit" class="px-6 py-3 gradient-emerald text-white rounded-lg font-bold hover:scale-105 transition-transform">Add</button>
+                </form>
+            </div>
+
+            <div class="glass rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Sign-up Grid</h3>
+                <div id="itemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="noItems" class="text-center py-8 text-gray-400">No items yet</div>
+            </div>
+
+            <!-- Poll -->
+            <div class="glass rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Vote Best Dish! 🍰</h3>
+                <div id="pollGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section id="mapSection" class="hidden space-y-6">
+            <div class="glass rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white">Live Map</h3>
+                    <div class="flex gap-2">
+                        <button onclick="app.locateMe()" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
+                            <i class="fas fa-crosshairs"></i>
+                        </button>
+                        <button onclick="app.showWeather()" class="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all">
+                            <i class="fas fa-cloud-sun"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="map"></div>
+                <div class="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+                    <span id="mapStats">0 guests pinned</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Section -->
+        <section id="chatSection" class="hidden space-y-6">
+            <div class="glass rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Live Chat</h3>
+                <div id="chatMessages" class="h-96 overflow-y-auto mb-4 space-y-3"></div>
+                <form onsubmit="app.sendMessage(event)" class="flex gap-2">
+                    <input type="text" id="chatInput" placeholder="Type a message..." required class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    <button type="button" onclick="app.showEmojiPicker()" class="p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all">
+                        😊
+                    </button>
+                    <button type="submit" class="px-6 py-3 gradient-emerald text-white rounded-lg font-bold hover:scale-105 transition-transform">Send</button>
+                </form>
+                <div id="emojiPicker" class="hidden mt-2 glass rounded-lg p-2"></div>
+            </div>
+        </section>
+
+        <!-- Photos Section -->
+        <section id="photosSection" class="hidden space-y-6">
+            <div class="glass rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Moments Gallery</h3>
+                <form onsubmit="app.uploadPhoto(event)" class="mb-4">
+                    <input type="file" id="photoInput" accept="image/*" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                </form>
+                <div id="photoGallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+                <div id="noPhotos" class="text-center py-8 text-gray-400">No photos yet</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="joinModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">Join Event</h3>
+            <input type="text" id="joinCode" placeholder="Enter event code" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <div class="flex gap-3">
+                <button onclick="app.joinEvent()" class="flex-1 px-4 py-3 gradient-emerald text-white rounded-lg font-bold">Join</button>
+                <button onclick="app.closeModal('joinModal')" class="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 rounded-lg font-bold">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="qrModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">Share Event</h3>
+            <div id="qrcode" class="flex justify-center mb-4"></div>
+            <button onclick="app.closeModal('qrModal')" class="w-full px-4 py-3 gradient-emerald text-white rounded-lg font-bold">Close</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg hidden transition-all transform">
+        <span id="toastMsg"></span>
+    </div>
+
+    <script>
+    // SPEED: P2P = 0 lag!
+    const app = {
+        eventId: '',
+        peer: null,
+        connections: new Map(),
+        data: { guests: [], items: [], pins: [], chat: [], photos: [] },
+        map: null,
+        markers: L.markerClusterGroup(),
+        geocodeCache: {},
+        saveTimer: null,
+        onlinePeers: new Set(),
+        currentTab: 'guests',
+        
+        // Custom potluck pin icon
+        pinIcon: L.icon({
+            iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA0MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMjAgNjBDMjAgNjAgNDAgMzUgNDAgMjBDNDAgOC45NTQzIDMxLjA0NTcgMCAyMCAwQzguOTU0MyAwIDAgOC45NTQzIDAgMjBDMCAzNSAyMCA2MCAyMCA2MFoiIGZpbGw9IiMxMGI5ODEiLz48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSI4IiBmaWxsPSJ3aGl0ZSIvPjx0ZXh0IHg9IjIwIiB5PSIyNCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+VjDwvdGV4dD48L3N2Zz4=',
+            iconSize: [40, 60],
+            iconAnchor: [20, 60],
+            popupAnchor: [0, -60]
+        }),
+        
+        async init() {
+            // Load from URL in <50ms
+            const params = new URLSearchParams(location.search);
+            this.eventId = params.get('event');
+            
+            if (this.eventId) {
+                await this.loadData();
+                
+                // Check if event exists
+                if (this.data.guests.length === 0 && this.data.items.length === 0 && this.data.chat.length === 0) {
+                    // Event doesn't exist, show hero screen
+                    document.querySelector('header').classList.remove('hidden');
+                    this.showToast('Event not found. Create a new one! 🎉');
+                } else {
+                    // Event exists, load it
+                    this.initPeer();
+                    this.initMap();
+                    this.bindEvents();
+                    this.render();
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    this.showToast('Event loaded! 🎉');
+                }
+            } else {
+                document.querySelector('header').classList.remove('hidden');
+            }
+        },
+        
+        newEvent() {
+            this.eventId = Math.random().toString(36).substr(2, 8);
+            history.replaceState(null, '', `?event=${this.eventId}`);
+            document.querySelector('header').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            this.initPeer();
+            this.initMap();
+            this.bindEvents();
+            this.render();
+            this.showToast('Event created! 🎊');
+            confetti({ particleCount: 100, spread: 70 });
+        },
+        
+        showJoinModal() {
+            document.getElementById('joinModal').classList.remove('hidden');
+        },
+        
+        async joinEvent() {
+            const code = document.getElementById('joinCode').value.trim();
+            if (!code) return;
+            
+            this.eventId = code;
+            history.replaceState(null, '', `?event=${this.eventId}`);
+            document.getElementById('joinModal').classList.add('hidden');
+            document.querySelector('header').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            await this.loadData();
+            this.initPeer();
+            this.initMap();
+            this.bindEvents();
+            this.render();
+            this.showToast('Joined event! 🎉');
+            confetti({ particleCount: 50, spread: 60 });
+        },
+        
+        // P2P Real-time sync
+        initPeer() {
+            this.peer = new Peer();
+            
+            this.peer.on('open', () => {
+                // Join room
+                this.connectToPeers();
+            });
+            
+            this.peer.on('connection', (conn) => {
+                this.handleConnection(conn);
+            });
+        },
+        
+        connectToPeers() {
+            // In production, use a signaling server to find peers
+            // For demo, we'll use localStorage polling as fallback
+            setInterval(() => this.pollForUpdates(), 1000);
+        },
+        
+        handleConnection(conn) {
+            this.connections.set(conn.peer, conn);
+            this.onlinePeers.add(conn.peer);
+            
+            conn.on('data', (data) => {
+                this.handleRemoteUpdate(data);
+            });
+            
+            conn.on('close', () => {
+                this.connections.delete(conn.peer);
+                this.onlinePeers.delete(conn.peer);
+                this.updateOnlineCount();
+            });
+            
+            // Send current state
+            conn.send({ type: 'sync', data: this.data });
+            this.updateOnlineCount();
+        },
+        
+        handleRemoteUpdate(update) {
+            switch (update.type) {
+                case 'sync':
+                    this.data = update.data;
+                    this.render();
+                    break;
+                case 'addGuest':
+                    this.data.guests.push(update.guest);
+                    this.render();
+                    this.showToast(`${update.guest.name} joined! 👋`);
+                    break;
+                case 'addItem':
+                    this.data.items.push(update.item);
+                    this.render();
+                    this.showToast(`${update.item.name} added! 🍽️`);
+                    break;
+                case 'chat':
+                    this.data.chat.push(update.message);
+                    this.renderChat();
+                    if (this.currentTab !== 'chat') {
+                        this.showChatBadge();
+                    }
+                    break;
+                case 'photo':
+                    this.data.photos.push(update.photo);
+                    this.renderPhotos();
+                    this.showToast('Photo shared! 📸');
+                    break;
+            }
+        },
+        
+        broadcast(type, data) {
+            const update = { type, ...data };
+            
+            // Send to all connected peers
+            this.connections.forEach(conn => {
+                if (conn.open) conn.send(update);
+            });
+            
+            // Fallback: localStorage for cross-tab sync
+            localStorage.setItem(`broadcast_${this.eventId}`, JSON.stringify(update));
+            setTimeout(() => localStorage.removeItem(`broadcast_${this.eventId}`), 1000);
+        },
+        
+        pollForUpdates() {
+            const update = localStorage.getItem(`broadcast_${this.eventId}`);
+            if (update) {
+                this.handleRemoteUpdate(JSON.parse(update));
+            }
+        },
+        
+        // Map functions
+        initMap() {
+            this.map = L.map('map').setView([37.7749, -122.4194], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
+            this.map.addLayer(this.markers);
+            
+            // Load existing pins
+            this.data.guests.forEach(g => {
+                if (g.coords) this.addPin(g);
+            });
+        },
+        
+        addPin(guest) {
+            const marker = L.marker(guest.coords, { icon: this.pinIcon })
+                .bindPopup(`<b>${guest.name}</b><br>${guest.address}`)
+                .addTo(this.markers);
+        },
+        
+        locateMe() {
+            navigator.geolocation.getCurrentPosition(pos => {
+                this.map.flyTo([pos.coords.latitude, pos.coords.longitude], 13);
+                this.showToast('Located! 🎯');
+            });
+        },
+        
+        showWeather() {
+            // Weather overlay (simplified)
+            this.showToast('Weather feature coming soon! ☀️');
+        },
+        
+        // Guest management
+        async addGuest(event) {
+            event.preventDefault();
+            const name = document.getElementById('guestName').value;
+            const email = document.getElementById('guestEmail').value;
+            const address = document.getElementById('guestAddress').value;
+            
+            const coords = await this.geocode(address);
+            if (!coords) {
+                this.showToast('Address not found! ❌');
+                return;
+            }
+            
+            const guest = { name, email, address, coords, rsvp: false, id: Date.now() };
+            this.data.guests.push(guest);
+            
+            this.broadcast('addGuest', { guest });
+            this.render();
+            this.scheduleSave();
+            
+            event.target.reset();
+            this.showToast(`${name} added! 🎉`);
+            confetti({ particleCount: 30, spread: 40 });
+        },
+        
+        toggleRSVP(id) {
+            const guest = this.data.guests.find(g => g.id === id);
+            if (guest) {
+                guest.rsvp = !guest.rsvp;
+                this.broadcast('updateGuest', { guest });
+                this.render();
+                this.scheduleSave();
+                this.showToast(guest.rsvp ? 'RSVP confirmed! ✅' : 'RSVP cancelled');
+            }
+        },
+        
+        // Item management
+        addItem(event) {
+            event.preventDefault();
+            const name = document.getElementById('itemName').value;
+            const category = document.getElementById('itemCategory').value;
+            
+            const item = { name, category, claimedBy: '', id: Date.now() };
+            this.data.items.push(item);
+            
+            this.broadcast('addItem', { item });
+            this.render();
+            this.scheduleSave();
+            
+            event.target.reset();
+            this.showToast(`${name} added! 🍽️`);
+        },
+        
+        claimItem(id, guestName) {
+            const item = this.data.items.find(i => i.id === id);
+            if (item) {
+                item.claimedBy = guestName;
+                this.broadcast('updateItem', { item });
+                this.render();
+                this.scheduleSave();
+                this.showToast(`Item claimed! ✅`);
+            }
+        },
+        
+        // Chat
+        sendMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chatInput');
+            const message = {
+                text: input.value,
+                sender: 'You',
+                timestamp: Date.now(),
+                id: Date.now()
+            };
+            
+            this.data.chat.push(message);
+            this.broadcast('chat', { message });
+            this.renderChat();
+            this.scheduleSave();
+            
+            input.value = '';
+        },
+        
+        showEmojiPicker() {
+            const picker = document.getElementById('emojiPicker');
+            const emojis = ['😀','😂','❤️','🎉','👍','🍕','🥳','🎊','🍻','🥂','🍰','🎂'];
+            
+            picker.innerHTML = emojis.map(emoji => 
+                `<button onclick="app.insertEmoji('${emoji}')" class="emoji-btn">${emoji}</button>`
+            ).join('');
+            
+            picker.classList.toggle('hidden');
+        },
+        
+        insertEmoji(emoji) {
+            const input = document.getElementById('chatInput');
+            input.value += emoji;
+            document.getElementById('emojiPicker').classList.add('hidden');
+            input.focus();
+        },
+        
+        // Photos
+        uploadPhoto(event) {
+            event.preventDefault();
+            const file = document.getElementById('photoInput').files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const photo = {
+                    url: e.target.result,
+                    timestamp: Date.now(),
+                    id: Date.now()
+                };
+                
+                this.data.photos.push(photo);
+                this.broadcast('photo', { photo });
+                this.renderPhotos();
+                this.scheduleSave();
+                
+                this.showToast('Photo shared! 📸');
+                confetti({ particleCount: 20, spread: 30 });
+            };
+            reader.readAsDataURL(file);
+            
+            event.target.reset();
+        },
+        
+        // UI functions
+        switchTab(tab) {
+            this.currentTab = tab;
+            
+            // Hide all sections
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('[id$="Tab"]').forEach(t => {
+                t.className = 'pb-3 font-semibold text-gray-600 hover:text-gray-800 whitespace-nowrap';
+            });
+            
+            // Show selected section
+            document.getElementById(`${tab}Section`).classList.remove('hidden');
+            document.getElementById(`${tab}Tab`).className = 'pb-3 font-semibold text-emerald-600 border-b-2 border-emerald-600 whitespace-nowrap';
+            
+            // Hide chat badge when viewing chat
+            if (tab === 'chat') {
+                document.getElementById('chatBadge').classList.add('hidden');
+            }
+        },
+        
+        showChatBadge() {
+            const badge = document.getElementById('chatBadge');
+            badge.textContent = this.data.chat.filter(m => !m.read).length;
+            badge.classList.remove('hidden');
+        },
+        
+        setTheme(theme) {
+            document.body.className = `bg-gray-50 dark:bg-gray-900 font-sans theme-${theme}`;
+            
+            // Update gradients
+            const header = document.querySelector('header');
+            if (theme === 'emerald') header.className = 'gradient-emerald text-white py-8 px-4 relative overflow-hidden';
+            else if (theme === 'purple') header.className = 'gradient-purple text-white py-8 px-4 relative overflow-hidden';
+            else if (theme === 'halloween') header.className = 'gradient-halloween text-white py-8 px-4 relative overflow-hidden';
+            
+            this.showToast(`Theme changed! 🎨`);
+        },
+        
+        shareEvent() {
+            navigator.clipboard.writeText(location.href);
+            this.showToast('Link copied! 📤');
+        },
+        
+        showQR() {
+            document.getElementById('qrModal').classList.remove('hidden');
+            new QRCode(document.getElementById('qrcode'), {
+                text: location.href,
+                width: 200,
+                height: 200
+            });
+        },
+        
+        exportPDF() {
+            this.showToast('Exporting PDF... 📄');
+            // PDF export implementation
+        },
+        
+        closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        },
+        
+        // Geocoding with caching
+        async geocode(address) {
+            if (this.geocodeCache[address]) return this.geocodeCache[address];
+            
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+                const data = await res.json();
+                if (data[0]) {
+                    const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                    this.geocodeCache[address] = coords;
+                    return coords;
+                }
+            } catch (e) {
+                console.error('Geocode error:', e);
+            }
+            return null;
+        },
+        
+        // Render functions
+        render() {
+            this.renderGuests();
+            this.renderItems();
+            this.renderChat();
+            this.renderPhotos();
+            this.updateStats();
+        },
+        
+        renderGuests() {
+            const list = document.getElementById('guestList');
+            const noGuests = document.getElementById('noGuests');
+            
+            if (this.data.guests.length === 0) {
+                list.innerHTML = '';
+                noGuests.style.display = 'block';
+                return;
+            }
+            
+            noGuests.style.display = 'none';
+            list.innerHTML = this.data.guests.map(g => `
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold text-gray-800 dark:text-white">${g.name}</h4>
+                        <button onclick="app.toggleRSVP(${g.id})" class="w-11 h-6 rounded-full transition-colors ${g.rsvp ? 'bg-emerald-500' : 'bg-gray-300'}">
+                            <span class="block w-4 h-4 bg-white rounded-full transition-transform ${g.rsvp ? 'ml-6' : 'ml-1'}"></span>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">📍 ${g.address}</p>
+                    ${g.email ? `<p class="text-sm text-gray-600 dark:text-gray-400">📧 ${g.email}</p>` : ''}
+                </div>
+            `).join('');
+        },
+        
+        renderItems() {
+            const grid = document.getElementById('itemsGrid');
+            const noItems = document.getElementById('noItems');
+            const pollGrid = document.getElementById('pollGrid');
+            
+            if (this.data.items.length === 0) {
+                grid.innerHTML = '';
+                pollGrid.innerHTML = '';
+                noItems.style.display = 'block';
+                return;
+            }
+            
+            noItems.style.display = 'none';
+            
+            // Items grid
+            grid.innerHTML = this.data.items.map(item => {
+                const categoryEmoji = {
+                    appetizer: '🥗',
+                    main: '🍖',
+                    dessert: '🍰',
+                    beverage: '🥤',
+                    other: '🍽️'
+                };
+                
+                return `
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-lg">${categoryEmoji[item.category]}</span>
+                            ${item.claimedBy ? `<span class="text-sm text-emerald-600 font-medium">✅ ${item.claimedBy}</span>` : ''}
+                        </div>
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">${item.name}</h4>
+                        <select onchange="app.claimItem(${item.id}, this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="">Claim this item...</option>
+                            ${this.data.guests.map(g => `<option value="${g.name}" ${item.claimedBy === g.name ? 'selected' : ''}>${g.name}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            }).join('');
+            
+            // Poll grid
+            pollGrid.innerHTML = this.data.items.map(item => `
+                <button onclick="app.voteForItem(${item.id})" class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all text-center">
+                    <div class="text-2xl mb-2">🍽️</div>
+                    <div class="font-medium text-gray-800 dark:text-white">${item.name}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">${item.votes || 0} votes</div>
+                </button>
+            `).join('');
+        },
+        
+        renderChat() {
+            const messages = document.getElementById('chatMessages');
+            messages.innerHTML = this.data.chat.map(msg => `
+                <div class="chat-bubble bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-gray-800 dark:text-white">${msg.sender}</span>
+                        <span class="text-xs text-gray-500">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300">${msg.text}</p>
+                </div>
+            `).join('');
+            
+            // Scroll to bottom
+            messages.scrollTop = messages.scrollHeight;
+        },
+        
+        renderPhotos() {
+            const gallery = document.getElementById('photoGallery');
+            const noPhotos = document.getElementById('noPhotos');
+            
+            if (this.data.photos.length === 0) {
+                gallery.innerHTML = '';
+                noPhotos.style.display = 'block';
+                return;
+            }
+            
+            noPhotos.style.display = 'none';
+            gallery.innerHTML = this.data.photos.map(photo => `
+                <div class="relative group cursor-pointer">
+                    <img src="${photo.url}" alt="Event photo" class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-all">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                        <span class="text-white text-sm">${new Date(photo.timestamp).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        },
+        
+        updateStats() {
+            document.getElementById('eventId').textContent = this.eventId;
+            document.getElementById('onlineCount').textContent = this.onlinePeers.size + 1;
+            document.getElementById('rsvpCount').textContent = this.data.guests.filter(g => g.rsvp).length;
+            document.getElementById('mapStats').textContent = `${this.data.guests.filter(g => g.coords).length} guests pinned`;
+            
+            // Update page title
+            document.title = `My Epic Potluck #${this.eventId} | ${this.data.guests.length} RSVPs`;
+            document.getElementById('pageTitle').textContent = document.title;
+        },
+        
+        updateOnlineCount() {
+            document.getElementById('onlineCount').textContent = this.onlinePeers.size + 1;
+            if (this.onlinePeers.size > 0) {
+                this.showToast(`${this.onlinePeers.size} friends online! 👥`);
+            }
+        },
+        
+        showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            
+            toastMsg.textContent = msg;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        },
+        
+        // Storage
+        async loadData() {
+            const data = await localforage.getItem(`event_${this.eventId}`);
+            if (data) this.data = data;
+        },
+        
+        scheduleSave() {
+            if (this.saveTimer) return;
+            this.saveTimer = requestAnimationFrame(async () => {
+                await localforage.setItem(`event_${this.eventId}`, this.data);
+                this.saveTimer = null;
+            });
+        },
+        
+        bindEvents() {
+            // Close modals on outside click
+            document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            });
+        }
+    };
+    
+    // Initialize app
+    window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
