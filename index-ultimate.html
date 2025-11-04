@@ -80,7 +80,7 @@
 <body class="bg-gray-50 dark:bg-gray-900 font-sans theme-emerald">
     
     <!-- Hero Header -->
-    <header class="gradient-emerald text-white py-8 px-4 relative overflow-hidden hidden">
+    <header class="gradient-emerald text-white py-8 px-4 relative overflow-hidden">
         <div class="absolute inset-0 bg-black/10"></div>
         <div class="max-w-6xl mx-auto relative z-10">
             <div class="text-center mb-6">
@@ -302,21 +302,12 @@
             
             if (this.eventId) {
                 await this.loadData();
-                
-                // Check if event exists
-                if (this.data.guests.length === 0 && this.data.items.length === 0 && this.data.chat.length === 0) {
-                    // Event doesn't exist, show hero screen
-                    document.querySelector('header').classList.remove('hidden');
-                    this.showToast('Event not found. Create a new one! 🎉');
-                } else {
-                    // Event exists, load it
-                    this.initPeer();
-                    this.initMap();
-                    this.bindEvents();
-                    this.render();
-                    document.getElementById('mainApp').classList.remove('hidden');
-                    this.showToast('Event loaded! 🎉');
-                }
+                this.initPeer();
+                this.initMap();
+                this.bindEvents();
+                this.render();
+                document.getElementById('mainApp').classList.remove('hidden');
+                this.showToast('Event loaded! 🎉');
             } else {
                 document.querySelector('header').classList.remove('hidden');
             }
