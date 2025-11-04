@@ -47,13 +47,24 @@
         
         <div class="text-center mb-8 no-print">
             <div class="flex items-center justify-between mb-4">
-                <div></div>
+                <div class="flex items-center gap-2">
+                    <span id="liveIndicator" class="hidden px-3 py-1 bg-green-500/20 dark:bg-green-500/30 border border-green-500 rounded-full text-xs font-semibold text-green-700 dark:text-green-300 cursor-help" title="This list updates in real-time when shared">
+                        🟢 Live
+                    </span>
+                    <button onclick="toggleViewMode()" id="viewModeBtn" class="hidden px-3 py-1 bg-amber-500/20 dark:bg-amber-500/30 border border-amber-500 rounded-full text-xs font-semibold text-amber-700 dark:text-amber-300">
+                        ✏️ Edit Mode
+                    </button>
+                </div>
                 <h1 class="text-5xl font-bold text-white dark:text-gray-100 mb-0">🦃 Thanksgiving Potluck 2025 🍂</h1>
                 <button onclick="toggleDarkMode()" id="darkModeBtn" class="px-4 py-2 bg-white/90 dark:bg-gray-800 rounded-xl shadow-lg transition-colors">
                     <span id="darkModeIcon">🌙</span>
                 </button>
             </div>
-            <button onclick="showShortcuts()" class="px-4 py-2 bg-white/90 dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-lg">⌨️ Shortcuts (?)</button>
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="showShortcuts()" class="px-4 py-2 bg-white/90 dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-lg">⌨️ Shortcuts (?)</button>
+                <button onclick="shareLink()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg transition-colors">📋 Share Link (Live)</button>
+                <button onclick="createNewEvent()" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl shadow-lg transition-colors">➕ New Event</button>
+            </div>
         </div>
         <div class="grid grid-cols-3 gap-4 mb-6">
             <div class="bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-lg"><div class="text-3xl">👥</div><div class="text-2xl font-bold dark:text-white" id="totalGuests">0</div><div class="text-sm text-gray-600 dark:text-gray-400">Total Guests</div></div>
@@ -136,6 +147,7 @@
     <div id="toastContainer" class="fixed top-4 right-4 z-50"></div>
     <script>
         let guests = [], editingId = null, qrInstance = null;
+        let currentEventId = null, isViewMode = false, lastSyncTime = 0, syncInterval = null;
         const categoryIcons = { appetizers: '🥖', mains: '🍗', sides: '🥗', desserts: '🥧', drinks: '🍷', other: '🍴' };
         
         // Dark Mode Toggle
@@ -161,8 +173,171 @@
         });
         function showShortcuts() { document.getElementById('shortcutsModal').classList.remove('hidden'); }
         function hideShortcuts() { document.getElementById('shortcutsModal').classList.add('hidden'); }
-        function loadData() { const stored = localStorage.getItem('thanksgivingGuests'); if (stored) guests = JSON.parse(stored); loadDarkMode(); render(); }
-        function saveData() { localStorage.setItem('thanksgivingGuests', JSON.stringify(guests)); }
+        // URL Hash-Based Data Management
+        function getUrlParams() {
+            const hash = window.location.hash.slice(1);
+            const params = {};
+            hash.split('&').forEach(part => {
+                const [key, value] = part.split('=');
+                if (key) params[key] = value;
+            });
+            return params;
+        }
+        
+        function loadData() {
+            const params = getUrlParams();
+            
+            // Check for event ID
+            if (params.event) {
+                currentEventId = params.event;
+                document.getElementById('liveIndicator').classList.remove('hidden');
+                document.getElementById('viewModeBtn').classList.remove('hidden');
+                
+                // Check view mode
+                isViewMode = params.mode === 'view';
+                updateViewMode();
+                
+                // Load from URL data parameter
+                if (params.data) {
+                    try {
+                        const decoded = JSON.parse(atob(params.data));
+                        guests = decoded.guests || [];
+                        lastSyncTime = Date.now();
+                    } catch (e) {
+                        console.error('Failed to parse URL data');
+                    }
+                } else {
+                    // Try localStorage for this event
+                    const stored = localStorage.getItem(`event_${currentEventId}`);
+                    if (stored) guests = JSON.parse(stored);
+                }
+                
+                // Start auto-sync
+                startAutoSync();
+            } else {
+                // Legacy mode - use localStorage
+                const stored = localStorage.getItem('thanksgivingGuests');
+                if (stored) guests = JSON.parse(stored);
+            }
+            
+            loadDarkMode();
+            render();
+        }
+        
+        function saveData() {
+            if (isViewMode) {
+                showToast('🔒 View-only mode. Cannot edit.', 'warning');
+                return false;
+            }
+            
+            if (currentEventId) {
+                // Save to localStorage as backup
+                localStorage.setItem(`event_${currentEventId}`, JSON.stringify(guests));
+                
+                // Update URL hash with data
+                const data = { guests, updated: Date.now() };
+                const encoded = btoa(JSON.stringify(data));
+                const mode = isViewMode ? 'view' : 'edit';
+                window.location.hash = `event=${currentEventId}&mode=${mode}&data=${encoded}`;
+                lastSyncTime = Date.now();
+            } else {
+                // Legacy localStorage
+                localStorage.setItem('thanksgivingGuests', JSON.stringify(guests));
+            }
+            return true;
+        }
+        
+        // Auto-sync from URL changes
+        function startAutoSync() {
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(() => {
+                const params = getUrlParams();
+                if (params.data) {
+                    try {
+                        const decoded = JSON.parse(atob(params.data));
+                        const urlUpdateTime = decoded.updated || 0;
+                        
+                        // Check if URL was updated by someone else
+                        if (urlUpdateTime > lastSyncTime + 2000) {
+                            guests = decoded.guests || [];
+                            lastSyncTime = Date.now();
+                            render();
+                            showToast('List updated by another user 🔄', 'info');
+                        }
+                    } catch (e) {
+                        // Ignore parse errors
+                    }
+                }
+            }, 2000);
+        }
+        
+        // Share Link Function
+        function shareLink() {
+            if (!currentEventId) {
+                // Create new event if none exists
+                createNewEvent();
+                return;
+            }
+            
+            const data = { guests, updated: Date.now() };
+            const encoded = btoa(JSON.stringify(data));
+            const mode = 'edit';
+            const url = `${window.location.origin}${window.location.pathname}#event=${currentEventId}&mode=${mode}&data=${encoded}`;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('Link copied! Anyone can view and edit ✅', 'success');
+            }).catch(() => {
+                showToast('Failed to copy link', 'error');
+            });
+        }
+        
+        // Create New Event
+        function createNewEvent() {
+            const newEventId = Date.now().toString();
+            currentEventId = newEventId;
+            guests = [];
+            const mode = 'edit';
+            window.location.hash = `event=${newEventId}&mode=${mode}`;
+            document.getElementById('liveIndicator').classList.remove('hidden');
+            document.getElementById('viewModeBtn').classList.remove('hidden');
+            startAutoSync();
+            render();
+            showToast('New event created! Share the link to collaborate 🎉', 'success');
+        }
+        
+        // Toggle View Mode
+        function toggleViewMode() {
+            if (!currentEventId) return;
+            isViewMode = !isViewMode;
+            updateViewMode();
+            
+            // Update URL
+            const params = getUrlParams();
+            const mode = isViewMode ? 'view' : 'edit';
+            const data = params.data || '';
+            window.location.hash = `event=${currentEventId}&mode=${mode}${data ? '&data=' + data : ''}`;
+        }
+        
+        function updateViewMode() {
+            const btn = document.getElementById('viewModeBtn');
+            const addBtn = document.querySelector('button[onclick="showAddModal()"]');
+            
+            if (isViewMode) {
+                btn.innerHTML = '🔒 View Only';
+                btn.classList.remove('bg-amber-500/20', 'border-amber-500', 'text-amber-700', 'dark:text-amber-300');
+                btn.classList.add('bg-red-500/20', 'border-red-500', 'text-red-700', 'dark:text-red-300');
+                // Hide edit buttons
+                document.querySelectorAll('.no-print button').forEach(b => {
+                    if (b.id !== 'viewModeBtn' && b.id !== 'darkModeBtn') b.style.display = 'none';
+                });
+            } else {
+                btn.innerHTML = '✏️ Edit Mode';
+                btn.classList.remove('bg-red-500/20', 'border-red-500', 'text-red-700', 'dark:text-red-300');
+                btn.classList.add('bg-amber-500/20', 'border-amber-500', 'text-amber-700', 'dark:text-amber-300');
+                // Show edit buttons
+                document.querySelectorAll('.no-print button').forEach(b => b.style.display = '');
+            }
+        }
         function showAddModal() { editingId = null; document.getElementById('modalTitle').textContent = 'Add Guest'; document.getElementById('addModal').classList.remove('hidden'); document.querySelector('form').reset(); }
         function hideModal() { document.getElementById('addModal').classList.add('hidden'); }
         function saveGuest(e) {
@@ -172,6 +347,10 @@
             const category = document.getElementById('guestCategory').value;
             const serves = document.getElementById('guestServes').value;
             const notes = document.getElementById('guestNotes').value.trim();
+            if (isViewMode) {
+                showToast('🔒 View-only mode. Cannot edit.', 'warning');
+                return;
+            }
             if (editingId) {
                 const guest = guests.find(g => g.id === editingId);
                 Object.assign(guest, {name, dish, category, serves: serves ? parseInt(serves) : null, notes});
@@ -180,7 +359,7 @@
                 guests.push({ id: Date.now().toString(), name, dish, category, serves: serves ? parseInt(serves) : null, notes, emoji: ['🎈','🍕','🥗','🥤','🎉'][Math.floor(Math.random()*5)] });
                 showToast(`${name} added! 🎉`, 'success');
             }
-            saveData(); render(); hideModal();
+            if (saveData()) { render(); hideModal(); }
         }
         function startEdit(id, field) {
             const guest = guests.find(g => g.id === id);
@@ -189,7 +368,19 @@
             cell.innerHTML = `<input type="text" value="${value}" class="px-2 py-1 border-2 rounded" onblur="saveEdit('${id}', '${field}', this.value)" onkeydown="if(event.key==='Enter') this.blur(); if(event.key==='Escape') render();" autofocus>`;
             cell.querySelector('input').select();
         }
-        function saveEdit(id, field, newValue) { const guest = guests.find(g => g.id === id); guest[field] = newValue; saveData(); render(); showToast(`${field} updated!`, 'success'); }
+        function saveEdit(id, field, newValue) {
+            if (isViewMode) {
+                showToast('🔒 View-only mode. Cannot edit.', 'warning');
+                render();
+                return;
+            }
+            const guest = guests.find(g => g.id === id);
+            guest[field] = newValue;
+            if (saveData()) {
+                render();
+                showToast(`${field} updated!`, 'success');
+            }
+        }
         function editGuest(id) {
             const guest = guests.find(g => g.id === id);
             editingId = id;
@@ -201,7 +392,19 @@
             document.getElementById('guestNotes').value = guest.notes || '';
             document.getElementById('addModal').classList.remove('hidden');
         }
-        function deleteGuest(id) { if (confirm('Remove this guest?')) { guests = guests.filter(g => g.id !== id); saveData(); render(); showToast('Guest removed', 'info'); } }
+        function deleteGuest(id) {
+            if (isViewMode) {
+                showToast('🔒 View-only mode. Cannot edit.', 'warning');
+                return;
+            }
+            if (confirm('Remove this guest?')) {
+                guests = guests.filter(g => g.id !== id);
+                if (saveData()) {
+                    render();
+                    showToast('Guest removed', 'info');
+                }
+            }
+        }
         function filterGuests() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const clearBtn = document.getElementById('clearBtn');
@@ -259,10 +462,20 @@
         }
         function render() { renderGuests(); updateDashboard(); }
         function showQR() {
+            let url = window.location.href;
+            
+            // If we have an event, generate URL with current data
+            if (currentEventId) {
+                const data = { guests, updated: Date.now() };
+                const encoded = btoa(JSON.stringify(data));
+                const mode = 'edit';
+                url = `${window.location.origin}${window.location.pathname}#event=${currentEventId}&mode=${mode}&data=${encoded}`;
+            }
+            
             document.getElementById('qrModal').classList.remove('hidden');
             const qrDiv = document.getElementById('qrcode');
             qrDiv.innerHTML = '';
-            qrInstance = new QRCode(qrDiv, { text: window.location.href, width: 256, height: 256, colorDark: "#000000", colorLight: "#ffffff" });
+            qrInstance = new QRCode(qrDiv, { text: url, width: 256, height: 256, colorDark: "#000000", colorLight: "#ffffff" });
         }
         function hideQR() { document.getElementById('qrModal').classList.add('hidden'); }
         function downloadQR() {
