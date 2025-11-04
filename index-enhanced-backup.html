@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">EventLink - Beautiful Free RSVP Tool</title>
+    <meta name="description" content="Create stunning RSVP pages for potlucks, meetings, parties - 100% free">
+    <meta property="og:title" content="EventLink - Beautiful Free RSVP Tool">
+    <meta property="og:description" content="Create stunning RSVP pages in seconds">
+    <meta property="og:image" content="">
+    <meta name="theme-color" content="#3b82f6">
+    
+    <!-- PWA -->
+    <link rel="manifest" href='data:application/json,{ "name": "EventLink", "short_name": "EventLink", "start_url": "/", "display": "standalone", "background_color": "#f8fafc", "theme_color": "#3b82f6", "icons": [{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind + DaisyUI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script>
+        tailwind.config = {
+            themes: [
+                {
+                    eventlink: {
+                        "primary": "#3b82f6",
+                        "primary-focus": "#2563eb", 
+                        "primary-content": "#ffffff",
+                        "secondary": "#64748b",
+                        "secondary-focus": "#475569",
+                        "secondary-content": "#ffffff",
+                        "accent": "#8b5cf6",
+                        "accent-focus": "#7c3aed",
+                        "accent-content": "#ffffff",
+                        "neutral": "#1f2937",
+                        "neutral-focus": "#111827",
+                        "neutral-content": "#ffffff",
+                        "base-100": "#ffffff",
+                        "base-200": "#f8fafc",
+                        "base-300": "#f1f5f9",
+                        "base-content": "#1e293b",
+                        "info": "#0ea5e9",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "error": "#ef4444",
+                    }
+                }
+            ],
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    animation: {
+                        'slide-in': 'slideIn 0.3s ease-out',
+                        'bounce-in': 'bounceIn 0.5s ease-out',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .gradient-hero { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); }
+        .gradient-potluck { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+        .gradient-meeting { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+        .gradient-party { background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
+        
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        
+        .avatar { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 600; 
+            color: white; 
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .table-striped tbody tr:nth-child(even) { background-color: rgba(248, 250, 252, 0.5); }
+        .dark .table-striped tbody tr:nth-child(even) { background-color: rgba(30, 41, 59, 0.5); }
+        
+        .theme-potluck { --theme-gradient: linear-gradient(135deg, #f97316, #ea580c); --theme-color: #f97316; }
+        .theme-meeting { --theme-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8); --theme-color: #3b82f6; }
+        .theme-party { --theme-gradient: linear-gradient(135deg, #ec4899, #be185d); --theme-color: #ec4899; }
+        
+        @media (max-width: 768px) {
+            .mobile-cards .table-row {
+                display: block;
+                background: white;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .mobile-cards .table-row td {
+                display: block;
+                padding: 0.25rem 0;
+                border: none !important;
+            }
+            
+            .mobile-cards .table-row td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #64748b;
+                display: inline-block;
+                margin-right: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-base-200 font-sans" data-theme="eventlink">
+    
+    <!-- Navigation -->
+    <nav class="navbar bg-base-100 shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-calendar-check text-2xl text-primary"></i>
+                    <span class="text-xl font-bold">EventLink</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleDarkMode()" class="btn btn-ghost btn-circle">
+                        <i class="fas fa-moon" id="darkModeIcon"></i>
+                    </button>
+                    <button onclick="showCreateEvent()" class="btn btn-primary">
+                        <i class="fas fa-plus mr-2"></i>Create Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Dashboard View -->
+        <div id="dashboardView">
+            <!-- Hero Section -->
+            <div class="gradient-hero text-white rounded-2xl p-8 mb-8 text-center">
+                <h1 class="text-4xl md:text-5xl font-black mb-4 floating">EventLink</h1>
+                <p class="text-xl md:text-2xl opacity-90 mb-6">Beautiful, Free RSVP Tool</p>
+                <p class="text-base md:text-lg opacity-80 mb-8">Create stunning RSVP pages for potlucks, meetings, parties, and more</p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="showCreateEvent()" class="btn bg-white text-primary hover:bg-gray-100 btn-lg">
+                        <i class="fas fa-rocket mr-2"></i>Start Creating
+                    </button>
+                    <button onclick="showDemo()" class="btn btn-outline btn-white btn-lg">
+                        <i class="fas fa-play mr-2"></i>View Demo
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="stat bg-base-100 rounded-lg shadow">
+                    <div class="stat-figure text-primary">
+                        <i class="fas fa-calendar text-3xl"></i>
+                    </div>
+                    <div class="stat-title">Total Events</div>
+                    <div class="stat-value text-primary" id="totalEvents">0</div>
+                </div>
+                <div class="stat bg-base-100 rounded-lg shadow">
+                    <div class="stat-figure text-secondary">
+                        <i class="fas fa-users text-3xl"></i>
+                    </div>
+                    <div class="stat-title">Total RSVPs</div>
+                    <div class="stat-value text-secondary" id="totalRSVPs">0</div>
+                </div>
+                <div class="stat bg-base-100 rounded-lg shadow">
+                    <div class="stat-figure text-accent">
+                        <i class="fas fa-share-nodes text-3xl"></i>
+                    </div>
+                    <div class="stat-title">Shares</div>
+                    <div class="stat-value text-accent">∞</div>
+                </div>
+            </div>
+            
+            <!-- Events List -->
+            <div class="bg-base-100 rounded-2xl shadow-xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Your Events</h2>
+                    <div class="flex gap-2">
+                        <button onclick="filterEvents('all')" class="btn btn-sm btn-outline">All</button>
+                        <button onclick="filterEvents('potluck')" class="btn btn-sm btn-outline">🍕 Potluck</button>
+                        <button onclick="filterEvents('meeting')" class="btn btn-sm btn-outline">📅 Meeting</button>
+                        <button onclick="filterEvents('party')" class="btn btn-sm btn-outline">🎉 Party</button>
+                    </div>
+                </div>
+                
+                <div id="eventsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Events will be rendered here -->
+                </div>
+                
+                <div id="noEvents" class="text-center py-16">
+                    <i class="fas fa-calendar-plus text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No events yet</h3>
+                    <p class="text-gray-500 mb-6">Create your first event to get started</p>
+                    <button onclick="showCreateEvent()" class="btn btn-primary">
+                        <i class="fas fa-plus mr-2"></i>Create Event
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Event RSVP View -->
+        <div id="eventView" class="hidden">
+            <!-- Event Header -->
+            <div id="eventHeader" class="rounded-2xl p-8 mb-8 text-white text-center">
+                <!-- Dynamic header content -->
+            </div>
+            
+            <!-- RSVP Form -->
+            <div class="bg-base-100 rounded-2xl shadow-xl p-6 mb-8">
+                <h3 class="text-2xl font-bold mb-6">RSVP Now</h3>
+                <form onsubmit="submitRSVP(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">Your Name *</span>
+                            </label>
+                            <input type="text" id="rsvpName" required 
+                                class="input input-bordered w-full" placeholder="John Doe">
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">Email (optional)</span>
+                            </label>
+                            <input type="email" id="rsvpEmail" 
+                                class="input input-bordered w-full" placeholder="john@example.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">RSVP Status *</span>
+                        </label>
+                        <div class="flex gap-4">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="rsvpStatus" value="yes" class="radio radio-primary" checked>
+                                <span class="ml-2">✅ Yes, I'll be there!</span>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="rsvpStatus" value="no" class="radio radio-primary">
+                                <span class="ml-2">❌ Sorry, can't make it</span>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="rsvpStatus" value="maybe" class="radio radio-primary">
+                                <span class="ml-2">🤔 Maybe</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Notes (optional)</span>
+                        </label>
+                        <textarea id="rsvpNotes" class="textarea textarea-bordered h-24" 
+                            placeholder="Any dietary restrictions or special requests?"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-full">
+                        <i class="fas fa-check mr-2"></i>Submit RSVP
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Guest List - Prettier Table -->
+            <div class="bg-base-100 rounded-2xl shadow-xl p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Guest List</h3>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-gray-600">
+                            <span id="goingCount">0</span> going • 
+                            <span id="maybeCount">0</span> maybe • 
+                            <span id="notGoingCount">0</span> not going
+                        </span>
+                        <button onclick="exportGuests()" class="btn btn-sm btn-outline">
+                            <i class="fas fa-download mr-2"></i>Export CSV
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Desktop Table View -->
+                <div class="overflow-x-auto hidden md:block">
+                    <table class="table table-striped w-full">
+                        <thead>
+                            <tr>
+                                <th>Guest</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                                <th>Added</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guestsTableBody">
+                            <!-- Guests will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Mobile Cards View -->
+                <div class="md:hidden mobile-cards" id="guestsMobileList">
+                    <!-- Mobile cards will be rendered here -->
+                </div>
+                
+                <div id="noGuests" class="text-center py-8 text-gray-400">
+                    <i class="fas fa-users text-4xl mb-2"></i>
+                    <p>No RSVPs yet</p>
+                </div>
+            </div>
+            
+            <!-- Share Section -->
+            <div class="bg-base-100 rounded-2xl shadow-xl p-6">
+                <h3 class="text-xl font-bold mb-4">Share This Event</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="copyEventLink()" class="btn btn-primary">
+                        <i class="fas fa-link mr-2"></i>Copy Link
+                    </button>
+                    <button onclick="shareOnWhatsApp()" class="btn btn-success">
+                        <i class="fab fa-whatsapp mr-2"></i>Share on WhatsApp
+                    </button>
+                    <button onclick="shareOnTwitter()" class="btn btn-info">
+                        <i class="fab fa-x-twitter mr-2"></i>Share on X
+                    </button>
+                    <button onclick="showQRCode()" class="btn btn-secondary">
+                        <i class="fas fa-qrcode mr-2"></i>Show QR Code
+                    </button>
+                </div>
+                
+                <!-- QR Code Display -->
+                <div id="qrCodeDisplay" class="hidden mt-6 text-center">
+                    <div class="bg-white p-4 rounded-lg inline-block">
+                        <div id="qrcode"></div>
+                        <button onclick="downloadQR()" class="btn btn-sm btn-primary mt-4">
+                            <i class="fas fa-download mr-2"></i>Download QR
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Back Button -->
+            <div class="text-center mt-8">
+                <button onclick="showDashboard()" class="btn btn-outline">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Create Event Modal -->
+    <div id="createEventModal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <h3 class="font-bold text-xl mb-6">Create New Event</h3>
+            <form onsubmit="createEvent(event)" class="space-y-6">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Event Title *</span>
+                    </label>
+                    <input type="text" id="eventTitle" required 
+                        class="input input-bordered w-full" placeholder="Summer Potluck 2025">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Date *</span>
+                        </label>
+                        <input type="date" id="eventDate" required 
+                            class="input input-bordered w-full">
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Time *</span>
+                        </label>
+                        <input type="time" id="eventTime" required 
+                            class="input input-bordered w-full">
+                    </div>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Location</span>
+                    </label>
+                    <input type="text" id="eventLocation" 
+                        class="input input-bordered w-full" placeholder="Central Park, NYC">
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Description</span>
+                    </label>
+                    <textarea id="eventDescription" class="textarea textarea-bordered h-24" 
+                        placeholder="Join us for an amazing potluck party!"></textarea>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Event Theme</span>
+                    </label>
+                    <div class="grid grid-cols-3 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="eventTheme" value="potluck" class="radio radio-primary" checked>
+                            <div class="p-4 border rounded-lg text-center hover:bg-gray-50">
+                                <div class="text-2xl mb-1">🍕</div>
+                                <div class="font-medium">Potluck</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="eventTheme" value="meeting" class="radio radio-primary">
+                            <div class="p-4 border rounded-lg text-center hover:bg-gray-50">
+                                <div class="text-2xl mb-1">📅</div>
+                                <div class="font-medium">Meeting</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="eventTheme" value="party" class="radio radio-primary">
+                            <div class="p-4 border rounded-lg text-center hover:bg-gray-50">
+                                <div class="text-2xl mb-1">🎉</div>
+                                <div class="font-medium">Party</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="modal-action">
+                    <button type="button" onclick="hideCreateEvent()" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-rocket mr-2"></i>Create Event
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div id="toast" class="toast toast-top toast-end">
+        <div id="toastAlert" class="alert alert-success">
+            <span id="toastMessage">Success!</span>
+        </div>
+    </div>
+    
+    <!-- Confetti Canvas -->
+    <canvas id="confetti" class="fixed inset-0 pointer-events-none z-50"></canvas>
+    
+    <script src="enhanced.js"></script>
+</body>
+</html>
