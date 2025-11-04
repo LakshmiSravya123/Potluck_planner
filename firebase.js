@@ -8,7 +8,7 @@ import { getDatabase, ref, push, onValue, set, update, remove, get, child } from
 const firebaseConfig = {
   apiKey: "AIzaSyDemoKeyReplaceWithActualKey",
   authDomain: "potluck-planner-demo.firebaseapp.com",
-  databaseURL: "https://potluck-planner-demo-default-rtdb.firebaseio.com",
+  databaseURL: "https://potluck-planner-15a68-default-rtdb.firebaseio.com",
   projectId: "potluck-planner-demo",
   storageBucket: "potluck-planner-demo.appspot.com",
   messagingSenderId: "123456789012",

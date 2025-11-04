@@ -10,58 +10,106 @@
     <meta property="og:image" content="">
     <meta name="theme-color" content="#f97316">
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
-    
     <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href='data:application/json,{ "name": "Potluck Planner", "short_name": "Potluck", "start_url": "/", "display": "standalone", "background_color": "#fef3c7", "theme_color": "#f97316", "icons": [{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍽️</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Production CSS (No Tailwind CDN) -->
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Icons (Local fallback) -->
-    <style>
-        .icon {
-            display: inline-block;
-            width: 1em;
-            height: 1em;
-            stroke-width: 0;
-            stroke: currentColor;
-            fill: currentColor;
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                        'pulse-soft': 'pulse 2s ease-in-out infinite'
+                    }
+                }
+            }
         }
-        
-        .icon-calendar::before { content: "📅"; }
-        .icon-clock::before { content: "🕐"; }
-        .icon-location::before { content: "📍"; }
-        .icon-user::before { content: "👤"; }
-        .icon-plus::before { content: "➕"; }
-        .icon-check::before { content: "✅"; }
-        .icon-times::before { content: "❌"; }
-        .icon-arrow-left::before { content: "←"; }
-        .icon-download::before { content: "📥"; }
-        .icon-link::before { content: "🔗"; }
-        .icon-whatsapp::before { content: "📱"; }
-        .icon-twitter::before { content: "🐦"; }
-        .icon-qrcode::before { content: "📱"; }
-        .icon-users::before { content: "👥"; }
-        .icon-chart::before { content: "📊"; }
-        .icon-spinner::before { content: "⏳"; }
-        .icon-utensils::before { content: "🍴"; }
-        .icon-exclamation::before { content: "⚠️"; }
-        .icon-question::before { content: "❓"; }
-        .icon-rocket::before { content: "🚀"; }
-    </style>
+    </script>
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        /* Accessibility focus styles */
+        *:focus {
+            outline: 2px solid #f97316;
+            outline-offset: 2px;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .card-hover {
+                border: 2px solid #000;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-amber-50 font-sans">
     
@@ -83,13 +131,14 @@
                         onclick="showDashboard()" 
                         class="hidden md:flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-orange-600 transition-colors"
                         aria-label="View dashboard">
-                        <span class="icon-calendar"></span>
+                        <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </button>
                     <button 
                         onclick="showCreateEventModal()" 
-                        class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
-                        <span class="icon-plus"></span>
+                        class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                        aria-label="Create new event">
+                        <i class="fas fa-plus"></i>
                         <span>Create Event</span>
                     </button>
                 </div>
@@ -115,13 +164,13 @@
                     <button 
                         onclick="showCreateEventModal()" 
                         class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors text-lg font-medium">
-                        <span class="icon-rocket"></span>
+                        <i class="fas fa-rocket mr-2"></i>
                         Start Your First Event
                     </button>
                     <button 
                         onclick="showHowItWorks()" 
                         class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 px-6 py-3 rounded-lg transition-colors text-lg font-medium">
-                        <span class="icon-question"></span>
+                        <i class="fas fa-question-circle mr-2"></i>
                         How It Works
                     </button>
                 </div>
@@ -131,28 +180,28 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white rounded-xl p-6 shadow-sm card-hover">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-2xl">📅</span>
+                        <i class="fas fa-calendar text-2xl text-orange-500"></i>
                         <span class="text-2xl font-bold text-gray-800" id="totalEvents">0</span>
                     </div>
                     <h3 class="text-gray-600 font-medium">Total Events</h3>
                 </div>
                 <div class="bg-white rounded-xl p-6 shadow-sm card-hover">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-2xl">👥</span>
+                        <i class="fas fa-users text-2xl text-green-500"></i>
                         <span class="text-2xl font-bold text-gray-800" id="totalGuests">0</span>
                     </div>
                     <h3 class="text-gray-600 font-medium">Total Guests</h3>
                 </div>
                 <div class="bg-white rounded-xl p-6 shadow-sm card-hover">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-2xl">✅</span>
+                        <i class="fas fa-check-circle text-2xl text-blue-500"></i>
                         <span class="text-2xl font-bold text-gray-800" id="confirmedRSVPs">0</span>
                     </div>
                     <h3 class="text-gray-600 font-medium">Confirmed</h3>
                 </div>
                 <div class="bg-white rounded-xl p-6 shadow-sm card-hover">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-2xl">📊</span>
+                        <i class="fas fa-chart-line text-2xl text-purple-500"></i>
                         <span class="text-2xl font-bold text-gray-800" id="activeEvents">0</span>
                     </div>
                     <h3 class="text-gray-600 font-medium">Active Events</h3>
@@ -166,13 +215,13 @@
                     <!-- Events will be rendered here -->
                 </div>
                 <div id="noEvents" class="text-center py-12">
-                    <span class="text-6xl">📅</span>
+                    <i class="fas fa-calendar-plus text-6xl text-gray-300 mb-4"></i>
                     <h4 class="text-xl font-semibold text-gray-600 mb-2">No events yet</h4>
                     <p class="text-gray-500 mb-6">Create your first potluck event to get started</p>
                     <button 
                         onclick="showCreateEventModal()" 
                         class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors">
-                        <span class="icon-plus"></span>
+                        <i class="fas fa-plus mr-2"></i>
                         Create Event
                     </button>
                 </div>
@@ -206,7 +255,7 @@
                                 required 
                                 aria-required="true"
                                 aria-describedby="nameError"
-                                class="form-input"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 placeholder="Enter your full name">
                             <span id="nameError" class="text-red-500 text-sm mt-1 hidden" role="alert"></span>
                         </div>
@@ -222,7 +271,7 @@
                                 required 
                                 aria-required="true"
                                 aria-describedby="emailError"
-                                class="form-input"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 placeholder="your@email.com">
                             <span id="emailError" class="text-red-500 text-sm mt-1 hidden" role="alert"></span>
                         </div>
@@ -237,7 +286,7 @@
                                 type="tel" 
                                 id="guestPhone" 
                                 name="guestPhone"
-                                class="form-input"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 placeholder="(555) 123-4567">
                         </div>
                         
@@ -250,7 +299,7 @@
                                 name="rsvpStatus"
                                 required 
                                 aria-required="true"
-                                class="form-input form-select">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                                 <option value="">Select your status</option>
                                 <option value="confirmed">✅ Yes, I'll be there!</option>
                                 <option value="maybe">🤔 Maybe</option>
@@ -266,7 +315,7 @@
                         <select 
                             id="bringingSlot" 
                             name="bringingSlot"
-                            class="form-input form-select">
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                             <option value="">Select an item</option>
                         </select>
                     </div>
@@ -279,7 +328,7 @@
                             type="text" 
                             id="dietaryRestrictions" 
                             name="dietaryRestrictions"
-                            class="form-input"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                             placeholder="e.g., Vegetarian, Gluten-free, Nut allergy">
                     </div>
                     
@@ -291,7 +340,7 @@
                             id="guestNotes" 
                             name="guestNotes"
                             rows="3"
-                            class="form-input form-textarea"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                             placeholder="Any special requests or messages for the host?"></textarea>
                     </div>
                     
@@ -304,15 +353,15 @@
                         <button 
                             type="submit" 
                             id="submitRSVPBtn"
-                            class="btn btn-primary">
-                            <span class="icon-check"></span>
+                            class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                            <i class="fas fa-check mr-2"></i>
                             Submit RSVP
                         </button>
                         <button 
                             type="button"
                             onclick="resetRSVPForm()"
-                            class="btn btn-secondary">
-                            <span class="icon-arrow-left"></span>
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg transition-colors font-medium">
+                            <i class="fas fa-redo mr-2"></i>
                             Reset Form
                         </button>
                     </div>
@@ -332,7 +381,7 @@
                         <button 
                             onclick="exportGuestList()"
                             class="text-orange-500 hover:text-orange-600 transition-colors">
-                            <span class="icon-download"></span>
+                            <i class="fas fa-download mr-1"></i>
                             Export
                         </button>
                     </div>
@@ -348,7 +397,7 @@
                 </div>
                 
                 <div id="noGuests" class="text-center py-8 text-gray-400">
-                    <span class="text-4xl">👥</span>
+                    <i class="fas fa-users text-4xl mb-2"></i>
                     <p>No RSVPs yet. Be the first to respond!</p>
                 </div>
             </div>
@@ -360,25 +409,25 @@
                     <button 
                         onclick="copyEventLink()"
                         class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                        <span class="icon-link"></span>
+                        <i class="fas fa-link"></i>
                         <span>Copy Link</span>
                     </button>
                     <button 
                         onclick="shareOnWhatsApp()"
                         class="flex items-center justify-center gap-2 px-4 py-3 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors">
-                        <span class="icon-whatsapp"></span>
+                        <i class="fab fa-whatsapp"></i>
                         <span>WhatsApp</span>
                     </button>
                     <button 
                         onclick="shareOnTwitter()"
                         class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors">
-                        <span class="icon-twitter"></span>
+                        <i class="fab fa-twitter"></i>
                         <span>Twitter</span>
                     </button>
                     <button 
                         onclick="generateQRCode()"
                         class="flex items-center justify-center gap-2 px-4 py-3 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors">
-                        <span class="icon-qrcode"></span>
+                        <i class="fas fa-qrcode"></i>
                         <span>QR Code</span>
                     </button>
                 </div>
@@ -389,7 +438,7 @@
                 <button 
                     onclick="showDashboard()"
                     class="text-orange-500 hover:text-orange-600 transition-colors font-medium">
-                    <span class="icon-arrow-left"></span>
+                    <i class="fas fa-arrow-left mr-2"></i>
                     Back to Dashboard
                 </button>
             </div>
@@ -398,7 +447,7 @@
     
     <!-- Create Event Modal -->
     <div id="createEventModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl max-w-2xl w-full max-h-90vh overflow-y-auto animate-slide-up">
+        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slide-up">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xl font-bold text-gray-800">Create New Event</h3>
@@ -406,7 +455,7 @@
                         onclick="hideCreateEventModal()"
                         class="text-gray-400 hover:text-gray-600 transition-colors"
                         aria-label="Close modal">
-                        <span class="icon-times"></span>
+                        <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 
@@ -422,7 +471,7 @@
                                 name="eventName"
                                 required 
                                 aria-required="true"
-                                class="form-input"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 placeholder="e.g., Summer Potluck 2025">
                         </div>
                         
@@ -436,7 +485,7 @@
                                 name="hostName"
                                 required 
                                 aria-required="true"
-                                class="form-input"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 placeholder="Your name">
                         </div>
                         
@@ -451,7 +500,7 @@
                                     name="eventDate"
                                     required 
                                     aria-required="true"
-                                    class="form-input">
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                             </div>
                             
                             <div class="form-group">
@@ -464,7 +513,7 @@
                                     name="eventTime"
                                     required 
                                     aria-required="true"
-                                    class="form-input">
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                             </div>
                         </div>
                         
@@ -478,7 +527,7 @@
                                 name="eventLocation"
                                 required 
                                 aria-required="true"
-                                class="form-input"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 placeholder="e.g., Community Center, 123 Main St">
                         </div>
                         
@@ -490,7 +539,7 @@
                                 type="text" 
                                 id="eventTheme" 
                                 name="eventTheme"
-                                class="form-input"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 placeholder="e.g., Festival, BBQ, International">
                         </div>
                         
@@ -502,7 +551,7 @@
                                 id="eventSlots" 
                                 name="eventSlots"
                                 rows="4"
-                                class="form-input form-textarea"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 placeholder="Appetizers&#10;Main Dish&#10;Side Dish&#10;Dessert&#10;Drinks"></textarea>
                         </div>
                     </div>
@@ -510,14 +559,14 @@
                     <div class="flex gap-4 mt-8">
                         <button 
                             type="submit" 
-                            class="btn btn-primary">
-                            <span class="icon-rocket"></span>
+                            class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                            <i class="fas fa-rocket mr-2"></i>
                             Create Event
                         </button>
                         <button 
                             type="button"
                             onclick="hideCreateEventModal()"
-                            class="btn btn-secondary">
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg transition-colors font-medium">
                             Cancel
                         </button>
                     </div>
@@ -536,7 +585,7 @@
                         onclick="hideHowItWorks()"
                         class="text-gray-400 hover:text-gray-600 transition-colors"
                         aria-label="Close modal">
-                        <span class="icon-times"></span>
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
                 
@@ -572,7 +621,7 @@
     
     <!-- Success/Error Messages (ARIA Live) -->
     <div id="toast" class="fixed top-4 right-4 z-50 hidden" role="alert" aria-live="assertive">
-        <div class="bg-white rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-300">
+        <div class="bg-white rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-[300px]">
             <div id="toastIcon"></div>
             <div>
                 <p id="toastMessage" class="font-medium text-gray-800"></p>
@@ -584,68 +633,12 @@
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-lg p-6 flex items-center gap-3">
-            <span class="icon-spinner animate-spin"></span>
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
             <span class="text-gray-700">Loading...</span>
         </div>
     </div>
     
-    <!-- Local Storage Fallback (No Firebase for demo) -->
-    <script>
-        // Local Storage fallback for demo purposes
-        class LocalStorageDB {
-            constructor() {
-                this.storageKey = 'potluck_events';
-            }
-            
-            getEvents() {
-                const data = localStorage.getItem(this.storageKey);
-                return data ? JSON.parse(data) : {};
-            }
-            
-            saveEvents(events) {
-                localStorage.setItem(this.storageKey, JSON.stringify(events));
-            }
-            
-            createEvent(eventData) {
-                const events = this.getEvents();
-                const id = 'event_' + Date.now();
-                events[id] = { ...eventData, id, createdAt: new Date().toISOString() };
-                this.saveEvents(events);
-                return id;
-            }
-            
-            getEvent(id) {
-                const events = this.getEvents();
-                return events[id] || null;
-            }
-            
-            updateEvent(id, updates) {
-                const events = this.getEvents();
-                if (events[id]) {
-                    events[id] = { ...events[id], ...updates, updatedAt: new Date().toISOString() };
-                    this.saveEvents(events);
-                }
-            }
-            
-            addGuest(eventId, guestData) {
-                const events = this.getEvents();
-                if (events[eventId]) {
-                    if (!events[eventId].guests) {
-                        events[eventId].guests = {};
-                    }
-                    const guestId = 'guest_' + Date.now();
-                    events[eventId].guests[guestId] = { ...guestData, id: guestId, createdAt: new Date().toISOString() };
-                    this.saveEvents(events);
-                    return guestId;
-                }
-                return null;
-            }
-        }
-        
-        // Initialize local storage
-        window.db = new LocalStorageDB();
-    </script>
-    
-    <script src="app.js"></script>
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="app-firebase.js"></script>
 </body>
 </html>
